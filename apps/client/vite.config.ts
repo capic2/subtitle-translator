@@ -35,12 +35,6 @@ export default defineConfig({
     setupFiles:['./setupTests.ts']
   },
 
-  reporters: ['default'],
-  coverage: {
-    reportsDirectory: '../../coverage/apps/client',
-    provider: 'v8',
-  },
-
   resolve: {
     alias: {
       'msw/native': require.resolve(path.resolve(__dirname, '../../node_modules/msw/lib/native/index.mjs')),
