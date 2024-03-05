@@ -58,5 +58,6 @@ export default defineConfig({
       reportsDirectory: '../../coverage/packages/shared',
       provider: 'v8',
     },
+    passWithNoTests: true
   },
 });
