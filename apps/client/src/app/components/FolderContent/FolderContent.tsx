@@ -45,7 +45,7 @@ const FolderContent = ({ uuid }: Props) => {
         child.type === Type.DIRECTORY ? (
           <FolderNode key={child.uuid} node={child} />
         ) : (
-          <FileNode key={child.hash} node={child} />
+          <FileNode key={child.uuid} node={child} />
         ),
       )}
     </ul>

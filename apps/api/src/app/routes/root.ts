@@ -14,13 +14,14 @@ import {
 import { ModifiedDree, SubInfo } from '@subtitle-translator/shared';
 import download from '../../addic7ed-api/download';
 
-const children: dree.Dree[] = [
+const children: ModifiedDree<dree.Dree>[] = [
   {
     name: 'Séries en cours',
     path: '/data/media/series_en_cours',
     type: dree.Type.DIRECTORY,
     relativePath: '.',
     isSymbolicLink: false,
+    uuid: uuidv4()
   },
   {
     name: 'Films à regarder',
@@ -28,6 +29,7 @@ const children: dree.Dree[] = [
     type: dree.Type.DIRECTORY,
     relativePath: '.',
     isSymbolicLink: false,
+    uuid: uuidv4()
   },
   {
     name: 'Séries VO',
@@ -36,6 +38,7 @@ const children: dree.Dree[] = [
     type: dree.Type.DIRECTORY,
     relativePath: '.',
     isSymbolicLink: false,
+    uuid: uuidv4()
   },
 ];
 

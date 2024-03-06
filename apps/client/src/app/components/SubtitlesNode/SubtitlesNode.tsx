@@ -32,7 +32,8 @@ const SubtitlesNode = ({ uuid }: Props) => {
     queryFn: () => fetchSubtiles(uuid),
     refetchOnWindowFocus: false,
   });
-  const [subtitles, setSubtitles] = useState<Subtitles>([])
+
+  const [subtitles, setSubtitles] = useState<Subtitles>(data ?? [])
 
   const addSubtitle = useCallback((subtitle: Subtitle) => {
     setSubtitles([...subtitles, subtitle])
@@ -46,14 +47,10 @@ const SubtitlesNode = ({ uuid }: Props) => {
     return <>Error: {error}</>;
   }
 
-  if (!data) {
-    return <>No data</>;
-  }
-
   return (
     <ul>
       {subtitles.map((subtitle) => (
-        <SubtitleNode subtitle={subtitle} addSubtitle={addSubtitle}/>
+        <SubtitleNode key={subtitle.uuid} subtitle={subtitle} addSubtitle={addSubtitle}/>
       ))}
     </ul>
   );

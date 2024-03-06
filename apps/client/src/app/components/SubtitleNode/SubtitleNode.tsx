@@ -93,7 +93,7 @@ const SubtitleNode = ({ subtitle, addSubtitle }: Props) => {
   };
 
   return (
-    <li key={subtitle.uuid} onClick={handleSubtitleAction}>
+    <li onClick={handleSubtitleAction}>
       <SubtitleText
         subtitle={subtitle}
         isLoading={mutationTranslate.isPending || mutationDownload.isPending}

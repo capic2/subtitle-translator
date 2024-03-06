@@ -8,7 +8,7 @@ const FileNode = ({ node }: { node: ModifiedDree<Dree> }) => {
   const [showSubtitles, setShowSubtitles] = useState<boolean>(false);
 
   return (
-    <li key={node.uuid}>
+    <li>
       <div onClick={() => setShowSubtitles(!showSubtitles)}>
         <FcFile />
         {node.name}
