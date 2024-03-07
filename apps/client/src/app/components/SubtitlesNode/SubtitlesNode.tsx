@@ -52,6 +52,7 @@ const SubtitlesNode = ({ uuid }: Props) => {
       queryClient.setQueryData(
         ['fetchSubtitles', uuid],
         (prevSubtitleMap: Map<Origin, Subtitles> | undefined) => {
+          console.log({subtitle})
           const subtitleMap = new Map(prevSubtitleMap);
 
           const subtitles = subtitleMap?.get(subtitle.origin);
