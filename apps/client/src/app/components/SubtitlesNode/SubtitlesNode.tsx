@@ -1,17 +1,20 @@
 import axios from 'axios';
 import { Dree } from 'dree';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ModifiedDree, Subtitle,
+  ModifiedDree,
+  Origin,
+  originSchema,
+  Subtitle,
   Subtitles,
-  subtitlesSchema
+  subtitlesSchema,
 } from '@subtitle-translator/shared';
 import SubtitleNode from '../SubtitleNode/SubtitleNode';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 
 const fetchSubtiles = async (uuid: ModifiedDree<Dree>['uuid']) => {
   const { data } = await axios.get(
-    `http://192.168.1.106:3333/api/files/${uuid}/subtitles`,
+    `http://192.168.1.106:3333/api/files/${uuid}/subtitles`
   );
 
   const parsed = subtitlesSchema.safeParse(data);
@@ -19,7 +22,17 @@ const fetchSubtiles = async (uuid: ModifiedDree<Dree>['uuid']) => {
     throw new Error(parsed.error.message);
   }
 
-  return parsed.data;
+  const subtitlesMap = new Map<Origin, Subtitles>();
+  originSchema.options.forEach((origin) => {
+    const filtered = parsed.data.filter(
+      (subtitle) => subtitle.origin === origin
+    );
+    if (filtered.length > 0) {
+      subtitlesMap.set(origin, filtered);
+    }
+  });
+
+  return subtitlesMap;
 };
 
 interface Props {
@@ -27,17 +40,29 @@ interface Props {
 }
 
 const SubtitlesNode = ({ uuid }: Props) => {
-  const { error, data, isLoading } = useQuery<Subtitles>({
+  const queryClient = useQueryClient();
+  const { error, data, isLoading } = useQuery<Map<Origin, Subtitles>>({
     queryKey: ['fetchSubtitles', uuid],
     queryFn: () => fetchSubtiles(uuid),
     refetchOnWindowFocus: false,
   });
 
-  const [subtitles, setSubtitles] = useState<Subtitles>(data ?? [])
+  const addSubtitle = useCallback(
+    (subtitle: Subtitle) => {
+      queryClient.setQueryData(
+        ['fetchSubtitles', uuid],
+        (prevSubtitleMap: Map<Origin, Subtitles> | undefined) => {
+          const subtitleMap = new Map(prevSubtitleMap);
 
-  const addSubtitle = useCallback((subtitle: Subtitle) => {
-    setSubtitles([...subtitles, subtitle])
-  },[])
+          const subtitles = subtitleMap?.get(subtitle.origin);
+          subtitleMap?.set(subtitle.origin, [...(subtitles ?? []), subtitle]);
+
+          return subtitleMap;
+        }
+      );
+    },
+    [uuid]
+  );
 
   if (isLoading) {
     return <>Loading...</>;
@@ -47,11 +72,29 @@ const SubtitlesNode = ({ uuid }: Props) => {
     return <>Error: {error}</>;
   }
 
+  if (!data) {
+    return <>No data</>;
+  }
+
   return (
     <ul>
-      {subtitles.map((subtitle) => (
-        <SubtitleNode key={subtitle.uuid} subtitle={subtitle} addSubtitle={addSubtitle}/>
-      ))}
+      {Array.from(data.entries()).map(([origin, subtitles]) => {
+        return (
+          <li>
+            {origin}
+            <ul>
+              {subtitles.map((subtitle) => (
+                <SubtitleNode
+                  key={subtitle.uuid}
+                  fileUuid={uuid}
+                  subtitle={subtitle}
+                  addSubtitle={addSubtitle}
+                />
+              ))}
+            </ul>
+          </li>
+        );
+      })}
     </ul>
   );
 };

@@ -6,39 +6,44 @@ import {
   Subtitle,
 } from '@subtitle-translator/shared';
 import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 interface Props {
+  fileUuid: string;
   subtitle: Subtitle;
   addSubtitle: (subtitle: Subtitle) => void;
 }
 
 const isInternalSubtitle = (
-  subtitle: Subtitle,
+  subtitle: Subtitle
 ): subtitle is InternalSubtitle => {
   return subtitle.origin === 'Internal';
 };
 const isAddic7edSubtitle = (
-  subtitle: Subtitle,
+  subtitle: Subtitle
 ): subtitle is Addic7edSubtitle => {
   return subtitle.origin === 'Addic7ed';
 };
 
-const SubtitleNode = ({ subtitle, addSubtitle }: Props) => {
-  const mutationTranslate = useMutation<Subtitle, void, { number: number }>({
+const SubtitleNode = ({ fileUuid, subtitle, addSubtitle }: Props) => {
+  const mutationTranslate = useMutation<
+    AxiosResponse<Subtitle>,
+    void,
+    { number: number }
+  >({
     mutationFn: ({ number }) => {
       return axios.post('http://192.168.1.106:3333/api/subtitles/translate', {
-        uuid: subtitle.uuid,
+        uuid: fileUuid,
         number,
       });
     },
     onSuccess: (data) => {
-      addSubtitle(data);
+      addSubtitle(data.data);
     },
   });
 
   const mutationDownload = useMutation<
-    Subtitle,
+    AxiosResponse<Subtitle>,
     void,
     {
       referer: SubInfo['referer'];
@@ -48,14 +53,14 @@ const SubtitleNode = ({ subtitle, addSubtitle }: Props) => {
   >({
     mutationFn: ({ referer, link, language }) => {
       return axios.post('http://192.168.1.106:3333/api/subtitles/download', {
-        uuid: subtitle.uuid,
+        uuid: fileUuid,
         referer,
         link,
         language,
       });
     },
     onSuccess: (data) => {
-      addSubtitle(data);
+      addSubtitle(data.data);
     },
   });
 

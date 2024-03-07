@@ -9,7 +9,7 @@ type ModifiedDreeProps<T> = {
   [K in keyof T]: T[K] extends Dree ? ModifiedDree<T[K]> : T[K];
 };
 
-const originSchema = z.enum(['Addic7ed', 'External', 'Internal']);
+export const originSchema = z.enum(['Addic7ed', 'External', 'Internal']);
 
 const internalSubtitleSchema = z.object({
   uuid: z.string(),

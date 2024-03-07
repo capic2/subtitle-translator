@@ -9,7 +9,6 @@ interface Props {
 const SubtitleText = ({ subtitle, isLoading }: Props) => {
   return (
     <>
-      {subtitle.origin} -
       {subtitle.language ?? 'default'}
       {subtitle.name ? ` -  ${subtitle.name}` : null}
       {isLoading && (

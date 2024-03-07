@@ -7,8 +7,8 @@ import {
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import axios from 'axios';
-import { userEvent } from '@storybook/testing-library';
 import SubtitleNode from './SubtitleNode';
+import userEvent from '@testing-library/user-event';
 
 describe('SubtitleNode', () => {
   it.todo('renders the component');
@@ -24,13 +24,13 @@ describe('SubtitleNode', () => {
 
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <SubtitleNode subtitle={subtitle} />
-      </QueryClientProvider>,
+        <SubtitleNode subtitle={subtitle} fileUuid="1" addSubtitle={vi.fn()} />
+      </QueryClientProvider>
     );
 
     const spy = vi.spyOn(axios, 'post');
 
-    await userEvent.click(await screen.findByText(/addic7ed/i));
+    await userEvent.click(await screen.findByRole('listitem'));
 
     expect(spy).toHaveBeenCalledWith(
       'http://192.168.1.106:3333/api/subtitles/download',
@@ -39,7 +39,7 @@ describe('SubtitleNode', () => {
         referer: '/a/b',
         uuid: '1',
         language: 'fr',
-      },
+      }
     );
   });
   it('translates the file if subtitle is Internal', async () => {
@@ -54,20 +54,20 @@ describe('SubtitleNode', () => {
 
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <SubtitleNode subtitle={subtitle} />
-      </QueryClientProvider>,
+        <SubtitleNode subtitle={subtitle} fileUuid="1" addSubtitle={vi.fn()} />
+      </QueryClientProvider>
     );
 
     const spy = vi.spyOn(axios, 'post');
 
-    await userEvent.click(await screen.findByText(/internal/i));
+    await userEvent.click(await screen.findByRole('listitem'));
 
     expect(spy).toHaveBeenCalledWith(
       'http://192.168.1.106:3333/api/subtitles/translate',
       {
         number: 3,
         uuid: '1',
-      },
+      }
     );
   });
   it('does nothing if subtitle is External', async () => {
@@ -80,13 +80,13 @@ describe('SubtitleNode', () => {
 
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <SubtitleNode subtitle={subtitle} />
-      </QueryClientProvider>,
+        <SubtitleNode subtitle={subtitle} fileUuid="1" addSubtitle={vi.fn()} />
+      </QueryClientProvider>
     );
 
     const spy = vi.spyOn(axios, 'post');
 
-    await userEvent.click(await screen.findByText(/external/i));
+    await userEvent.click(await screen.findByRole('listitem'));
 
     expect(spy).not.toHaveBeenCalled();
   });
