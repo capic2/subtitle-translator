@@ -21,7 +21,7 @@ const children: ModifiedDree<dree.Dree>[] = [
     type: dree.Type.DIRECTORY,
     relativePath: '.',
     isSymbolicLink: false,
-    uuid: uuidv4()
+    uuid: uuidv4(),
   },
   {
     name: 'Films à regarder',
@@ -29,7 +29,7 @@ const children: ModifiedDree<dree.Dree>[] = [
     type: dree.Type.DIRECTORY,
     relativePath: '.',
     isSymbolicLink: false,
-    uuid: uuidv4()
+    uuid: uuidv4(),
   },
   {
     name: 'Séries VO',
@@ -38,7 +38,7 @@ const children: ModifiedDree<dree.Dree>[] = [
     type: dree.Type.DIRECTORY,
     relativePath: '.',
     isSymbolicLink: false,
-    uuid: uuidv4()
+    uuid: uuidv4(),
   },
 ];
 
@@ -80,8 +80,8 @@ export default async function (fastify: FastifyInstance) {
             extensions: ['mkv'],
           },
           fileCallback,
-          directoryCallback,
-        ),
+          directoryCallback
+        )
       ),
     };
 
@@ -128,11 +128,11 @@ export default async function (fastify: FastifyInstance) {
           extensions: ['mkv'],
         },
         fileCallback,
-        directoryCallback,
+        directoryCallback
       );
 
       return tree;
-    },
+    }
   );
 
   fastify.get<{ Params: { uuid: string } }>(
@@ -161,11 +161,11 @@ export default async function (fastify: FastifyInstance) {
       try {
         const subtitlesFromDirectory = getSubtitlesFromDirectory(file);
         logger.debug(
-          `subtitlesFromDirectory: ${JSON.stringify(subtitlesFromDirectory)}`,
+          `subtitlesFromDirectory: ${JSON.stringify(subtitlesFromDirectory)}`
         );
         const subtitlesFromAddic7ed = await getSubtitlesFromAddic7ed(file);
         logger.debug(
-          `subtitlesFromAddic7ed: ${JSON.stringify(subtitlesFromAddic7ed)}`,
+          `subtitlesFromAddic7ed: ${JSON.stringify(subtitlesFromAddic7ed)}`
         );
         const subtitlesFromFile = await getSubtitlesFromFile(file);
         logger.debug(`subtitlesFromFile: ${JSON.stringify(subtitlesFromFile)}`);
@@ -179,7 +179,7 @@ export default async function (fastify: FastifyInstance) {
         logger.debug(`Error: ${error}`);
         reply.send(error);
       }
-    },
+    }
   );
 
   fastify.post<{ Body: { uuid: string; number: number } }>(
@@ -209,13 +209,13 @@ export default async function (fastify: FastifyInstance) {
         logger.debug(
           `mkvextract tracks "${file.path}" ${
             Number(number) - 1
-          }:"/data/temp/${path.basename(file.path)}.srt"`,
+          }:"/data/temp/${path.basename(file.path)}.srt"`
         );
 
         const stdoutMkvextract = execSync(
           `mkvextract tracks "${file.path}" ${
             Number(number) - 1
-          }:"/data/temp/${path.basename(file.path)}.srt"`,
+          }:"/data/temp/${path.basename(file.path)}.srt"`
         );
 
         // the *entire* stdout and stderr (buffered)
@@ -225,14 +225,14 @@ export default async function (fastify: FastifyInstance) {
         `/data/input/${path.basename(filePath)}.srt`) */
         logger.debug(
           `subtrans translate "/data/temp/${path.basename(
-            file.path,
-          )}.srt" --src en --dest fr`,
+            file.path
+          )}.srt" --src en --dest fr`
         );
 
         const stdoutSubtrans = execSync(
           `subtrans translate "/data/temp/${path.basename(
-            file.path,
-          )}.srt" --src en --dest fr`,
+            file.path
+          )}.srt" --src en --dest fr`
         );
 
         console.info(stdoutSubtrans);
@@ -241,12 +241,12 @@ export default async function (fastify: FastifyInstance) {
         fs.rmSync(`/data/temp/${path.basename(file.path)}.srt`);
         logger.debug(
           `move file to ${path.dirname(file.path)}/${path.basename(
-            file.path,
-          )}.fr.srt`,
+            file.path
+          )}.fr.srt`
         );
         fs.copyFileSync(
           `/data/temp/${path.basename(file.path)}.fr.srt`,
-          `${path.dirname(file.path)}/${path.basename(file.path)}.fr.srt`,
+          `${path.dirname(file.path)}/${path.basename(file.path)}.fr.srt`
         );
         fs.rmSync(`/data/temp/${path.basename(file.path)}.fr.srt`);
 
@@ -274,7 +274,7 @@ export default async function (fastify: FastifyInstance) {
           message: error.message,
         };
       }
-    },
+    }
   );
 
   fastify.post<{ Body: SubInfo & { uuid: string; language: string } }>(
@@ -301,13 +301,13 @@ export default async function (fastify: FastifyInstance) {
       }
 
       logger.debug(
-        `Download file ${file.path}.srt with link ${link} and referer ${referer}`,
+        `Download file ${file.path}.srt with link ${link} and referer ${referer}`
       );
       await download({ link, referer }, `${file.path}.${language}.srt`);
 
       const dree: ModifiedDree<dree.Dree> = {
         uuid: uuidv4(),
-        name: `${file.path}.${language}.srt`,
+        name: `${path.basename(file.path)}.${language}.srt`,
         path: `${path.dirname(file.path)}/${file.path}.${language}.srt`,
         type: Type.FILE,
         relativePath: '.',
@@ -322,7 +322,7 @@ export default async function (fastify: FastifyInstance) {
         name: dree.name,
         origin: 'External',
       });
-    },
+    }
   );
 
   fastify.get('/local/subtitles-addic7ed', async () => {
@@ -352,7 +352,7 @@ export default async function (fastify: FastifyInstance) {
   fastify.get('/local/subtitle/download', async () => {
     await download(
       { link: '/original/172709/2', referer: '/show/8778' },
-      'temps.srt',
+      'temps.srt'
     );
   });
 }
