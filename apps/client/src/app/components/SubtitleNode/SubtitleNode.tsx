@@ -7,6 +7,7 @@ import {
 } from '@subtitle-translator/shared';
 import { useMutation } from '@tanstack/react-query';
 import axios, { AxiosResponse } from 'axios';
+import { useAppConfigProvider } from '../../providers/AppConfigProvider';
 
 interface Props {
   fileUuid: string;
@@ -26,13 +27,14 @@ const isAddic7edSubtitle = (
 };
 
 const SubtitleNode = ({ fileUuid, subtitle, addSubtitle }: Props) => {
+  const { apiUrl } = useAppConfigProvider();
   const mutationTranslate = useMutation<
     AxiosResponse<Subtitle>,
     void,
     { number: number }
   >({
     mutationFn: ({ number }) => {
-      return axios.post('http://192.168.1.106:3333/api/subtitles/translate', {
+      return axios.post(`${apiUrl}/api/subtitles/translate`, {
         uuid: fileUuid,
         number,
       });
@@ -52,7 +54,7 @@ const SubtitleNode = ({ fileUuid, subtitle, addSubtitle }: Props) => {
     }
   >({
     mutationFn: ({ referer, link, language }) => {
-      return axios.post('http://192.168.1.106:3333/api/subtitles/download', {
+      return axios.post(`${apiUrl}/api/subtitles/download`, {
         uuid: fileUuid,
         referer,
         link,

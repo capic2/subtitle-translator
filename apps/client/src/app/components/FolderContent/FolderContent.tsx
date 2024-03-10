@@ -5,10 +5,11 @@ import FolderNode from '../FolderNode/FolderNode';
 import FileNode from '../FileNode/FileNode';
 import React from 'react';
 import type { ModifiedDree } from '@subtitle-translator/shared';
+import { useAppConfigProvider } from '../../providers/AppConfigProvider';
 
-const fetchFolder = async (uuid: string) => {
+const fetchFolder = async (baseUrl: string, uuid: string) => {
   return await axios.get(
-    `http://192.168.1.106:3333/api/directories/${uuid}/files`,
+    `${baseUrl}/api/directories/${uuid}/files`,
   );
 };
 
@@ -17,13 +18,14 @@ interface Props {
 }
 
 const FolderContent = ({ uuid }: Props) => {
+  const {apiUrl} = useAppConfigProvider()
   const { data, error, isLoading } = useQuery<
     unknown,
     unknown,
     { data: ModifiedDree<Dree> }
   >({
     queryKey: ['fetchFolderContent', uuid],
-    queryFn: () => fetchFolder(uuid),
+    queryFn: () => fetchFolder(apiUrl,uuid),
     refetchOnWindowFocus: false,
   });
 

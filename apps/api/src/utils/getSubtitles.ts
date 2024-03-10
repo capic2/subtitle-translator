@@ -76,7 +76,7 @@ export const getSubtitlesFromAddic7ed = async (file: dree.Dree) => {
       show,
       season,
       episode,
-      languages: ['french'],
+      languages: ['french', 'english'],
     });
     logger.debug(
       `Subtitles found on addic7ed: ${JSON.stringify(addic7edSubtitles)}`,

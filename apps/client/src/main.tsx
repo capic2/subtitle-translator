@@ -3,6 +3,7 @@ import * as ReactDOM from 'react-dom/client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App2 from './app/App2';
+import { AppConfigProvider } from './app/providers/AppConfigProvider';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -23,11 +24,15 @@ async function enableMocking() {
 } */
 
 //enableMocking().then(() => {
-  root.render(
-    <StrictMode>
+root.render(
+  <StrictMode>
+    <AppConfigProvider
+      apiUrl={process.env.API_URL ?? 'http://192.168.1.106:3333'}
+    >
       <QueryClientProvider client={client}>
         <App2 />
       </QueryClientProvider>
-    </StrictMode>
-  );
+    </AppConfigProvider>
+  </StrictMode>
+);
 //});

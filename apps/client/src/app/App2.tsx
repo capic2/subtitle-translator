@@ -4,19 +4,21 @@ import { Dree, Type } from 'dree';
 import FolderNode from './components/FolderNode/FolderNode';
 import FileNode from './components/FileNode/FileNode';
 import { ModifiedDree } from '@subtitle-translator/shared';
+import { useAppConfigProvider } from './providers/AppConfigProvider';
 
-const fetch = () => {
-  return axios.get('http://192.168.1.106:3333/api/files');
+const fetch = (baseUrl: string) => {
+  return axios.get(`${baseUrl}/api/files`);
 };
 
 const App2 = () => {
+  const { apiUrl } = useAppConfigProvider();
   const { data, error, isLoading } = useQuery<
     unknown,
     unknown,
     { data: ModifiedDree<Dree> }
   >({
     queryKey: ['fetch'],
-    queryFn: fetch,
+    queryFn: () => fetch(apiUrl),
     refetchOnWindowFocus: false,
   });
 
@@ -41,7 +43,7 @@ const App2 = () => {
             <FolderNode key={child.uuid} node={child} />
           ) : (
             <FileNode key={child.uuid} node={child} />
-          ),
+          )
         )}
       </ul>
     </div>

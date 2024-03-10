@@ -12,7 +12,7 @@ import {
 import SubtitleNode from '../SubtitleNode/SubtitleNode';
 import { useCallback } from 'react';
 
-const fetchSubtiles = async (uuid: ModifiedDree<Dree>['uuid']) => {
+const fetchSubtitles = async (uuid: ModifiedDree<Dree>['uuid']) => {
   const { data } = await axios.get(
     `http://192.168.1.106:3333/api/files/${uuid}/subtitles`
   );
@@ -43,7 +43,7 @@ const SubtitlesNode = ({ uuid }: Props) => {
   const queryClient = useQueryClient();
   const { error, data, isLoading } = useQuery<Map<Origin, Subtitles>>({
     queryKey: ['fetchSubtitles', uuid],
-    queryFn: () => fetchSubtiles(uuid),
+    queryFn: () => fetchSubtitles(uuid),
     refetchOnWindowFocus: false,
   });
 
@@ -52,7 +52,6 @@ const SubtitlesNode = ({ uuid }: Props) => {
       queryClient.setQueryData(
         ['fetchSubtitles', uuid],
         (prevSubtitleMap: Map<Origin, Subtitles> | undefined) => {
-          console.log({subtitle})
           const subtitleMap = new Map(prevSubtitleMap);
 
           const subtitles = subtitleMap?.get(subtitle.origin);
@@ -62,7 +61,7 @@ const SubtitlesNode = ({ uuid }: Props) => {
         }
       );
     },
-    [uuid]
+    [queryClient, uuid]
   );
 
   if (isLoading) {
