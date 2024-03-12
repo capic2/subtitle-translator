@@ -27,7 +27,11 @@ async function enableMocking() {
 root.render(
   <StrictMode>
     <AppConfigProvider
-      apiUrl={process.env.API_URL ?? 'http://192.168.1.106:3333'}
+      apiUrl={
+        import.meta.env.DEV
+          ? 'http://localhost:3333'
+          : 'http://192.168.1.106:3333'
+      }
     >
       <QueryClientProvider client={client}>
         <App2 />

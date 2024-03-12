@@ -11,10 +11,14 @@ import {
 } from '@subtitle-translator/shared';
 import SubtitleNode from '../SubtitleNode/SubtitleNode';
 import { useCallback } from 'react';
+import { useAppConfigProvider } from '../../providers/AppConfigProvider';
 
-const fetchSubtitles = async (uuid: ModifiedDree<Dree>['uuid']) => {
+const fetchSubtitles = async (
+  apiUrl: string,
+  uuid: ModifiedDree<Dree>['uuid']
+) => {
   const { data } = await axios.get(
-    `http://192.168.1.106:3333/api/files/${uuid}/subtitles`
+    `${apiUrl}/api/files/${uuid}/subtitles`
   );
 
   const parsed = subtitlesSchema.safeParse(data);
@@ -41,9 +45,10 @@ interface Props {
 
 const SubtitlesNode = ({ uuid }: Props) => {
   const queryClient = useQueryClient();
+  const { apiUrl } = useAppConfigProvider();
   const { error, data, isLoading } = useQuery<Map<Origin, Subtitles>>({
     queryKey: ['fetchSubtitles', uuid],
-    queryFn: () => fetchSubtitles(uuid),
+    queryFn: () => fetchSubtitles(apiUrl, uuid),
     refetchOnWindowFocus: false,
   });
 

@@ -13,34 +13,47 @@ import {
 } from '../../utils/getSubtitles';
 import { ModifiedDree, SubInfo } from '@subtitle-translator/shared';
 import download from '../../addic7ed-api/download';
+import * as process from 'node:process';
 
-const children: ModifiedDree<dree.Dree>[] = [
-  {
-    name: 'Séries en cours',
-    path: '/data/media/series_en_cours',
+let children: ModifiedDree<dree.Dree>[];
+if (process.env.NODE_ENV === 'production') {
+  children = [
+    {
+      name: 'Séries en cours',
+      path: '/data/media/series_en_cours',
+      type: dree.Type.DIRECTORY,
+      relativePath: '.',
+      isSymbolicLink: false,
+      uuid: uuidv4(),
+    },
+    {
+      name: 'Films à regarder',
+      path: '/data/media/films_a_regarder',
+      type: dree.Type.DIRECTORY,
+      relativePath: '.',
+      isSymbolicLink: false,
+      uuid: uuidv4(),
+    },
+    {
+      name: 'Séries VO',
+      path: '/data/media/series_vo',
+      // path: '/mnt/c/_D',
+      type: dree.Type.DIRECTORY,
+      relativePath: '.',
+      isSymbolicLink: false,
+      uuid: uuidv4(),
+    },
+  ];
+} else {
+  children = [{
+    name: 'Environement de développement',
+    path: 'data',
     type: dree.Type.DIRECTORY,
     relativePath: '.',
     isSymbolicLink: false,
     uuid: uuidv4(),
-  },
-  {
-    name: 'Films à regarder',
-    path: '/data/media/films_a_regarder',
-    type: dree.Type.DIRECTORY,
-    relativePath: '.',
-    isSymbolicLink: false,
-    uuid: uuidv4(),
-  },
-  {
-    name: 'Séries VO',
-    path: '/data/media/series_vo',
-    // path: '/mnt/c/_D',
-    type: dree.Type.DIRECTORY,
-    relativePath: '.',
-    isSymbolicLink: false,
-    uuid: uuidv4(),
-  },
-];
+  },];
+}
 
 export const directoryMap = new Map<string, dree.Dree>();
 export const fileMap = new Map<string, dree.Dree>();
@@ -144,17 +157,17 @@ export default async function (fastify: FastifyInstance) {
         logger.error(`No uuid provided`);
         return {
           status: false,
-          message: 'No file hash',
+          message: 'No file uuid',
         };
       }
-
+      console.log({fileMap})
       const file = fileMap.get(uuid);
 
       if (!file) {
-        logger.error(`No directory found with ${uuid}`);
+        logger.error(`No file found with ${uuid}`);
         return {
           status: false,
-          message: 'No file found',
+          message: `No file found with uuid: ${uuid}`,
         };
       }
 
@@ -201,7 +214,7 @@ export default async function (fastify: FastifyInstance) {
         logger.error(`No file found with ${uuid}`);
         return {
           status: false,
-          message: 'No file path',
+          message: `No file found with uuid: ${uuid}`,
         };
       }
 
@@ -296,7 +309,7 @@ export default async function (fastify: FastifyInstance) {
         logger.error(`No file found with ${uuid}`);
         return {
           status: false,
-          message: 'No file path',
+          message: `No file found with uuid: ${uuid}`,
         };
       }
 
