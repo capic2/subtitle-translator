@@ -37,6 +37,6 @@ jobs:
 
       #- run: npx nx-cloud record -- nx format:check
       - name: Install playwright
-        run: npx playwright install
+        run: npx playwright install --with-deps
 
       - run: npx nx affected -t lint test build e2e --parallel=3
