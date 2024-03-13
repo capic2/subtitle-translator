@@ -14,6 +14,10 @@ describe('app', () => {
     server.register(app);
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   describe('/api/files', () => {
     it('responds with 200', async () => {
       const response = await server.inject({
@@ -33,24 +37,6 @@ describe('app', () => {
         sizeInBytes: 0,
         uuid: 'c1d1a886-fa2e-4238-b85b-425b3ff12109',
       };
-      const child2 = {
-        name: 'films_a_regarder',
-        path: '/data/media/films_a_regarder',
-        relativePath: '.',
-        type: Type.DIRECTORY,
-        isSymbolicLink: false,
-        sizeInBytes: 0,
-        uuid: '1800a8ff-e810-43e3-a1c4-7b52358718eb',
-      };
-      const child3 = {
-        name: 'series_vo',
-        path: '/data/media/series_vo',
-        relativePath: '.',
-        type: Type.DIRECTORY,
-        isSymbolicLink: false,
-        sizeInBytes: 0,
-        uuid: '616d7b98-afd5-4708-b265-54cba336a9a9',
-      };
 
       const result: dree.Dree = {
         name: 'root',
@@ -58,11 +44,9 @@ describe('app', () => {
         type: Type.DIRECTORY,
         relativePath: '.',
         isSymbolicLink: false,
-        children: [child1, child2, child3],
+        children: [child1],
       };
       jest.spyOn(dree, 'scan').mockReturnValueOnce(child1);
-      jest.spyOn(dree, 'scan').mockReturnValueOnce(child2);
-      jest.spyOn(dree, 'scan').mockReturnValueOnce(child3);
 
       const response = await server.inject({
         method: 'GET',
@@ -205,7 +189,7 @@ describe('app', () => {
         expect(response.statusCode).toEqual(200);
       });
 
-      it('returns the files and director of the directory', async () => {
+      it('returns the files and directories of the directory', async () => {
         const response = await server.inject({
           method: 'GET',
           url: '/api/directories/1/files',

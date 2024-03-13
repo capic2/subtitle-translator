@@ -8091,10 +8091,10 @@ const json = {
 };
 */
 export const handlers = [
-  http.get('http://192.168.1.106:3333/api/files', () => {
+  http.get('/api/files', () => {
     return HttpResponse.json<ModifiedDree<dree.Dree>>(root);
   }),
-  http.get('http://192.168.1.106:3333/api/directories/:uuid/files', () => {
+  http.get('/api/directories/:uuid/files', () => {
     return HttpResponse.json<ModifiedDree<dree.Dree>>({
       name: 'The Witcher',
       path: '/data/media/series_vo/The Witcher',
@@ -8218,7 +8218,7 @@ export const handlers = [
     });
   }),
   http.get(
-    `http://192.168.1.106:3333/api/files/:uuid/subtitles`,
+    `/api/files/:uuid/subtitles`,
     async ({ params }) => {
       return HttpResponse.json<Subtitles>([
         {
@@ -8255,7 +8255,7 @@ export const handlers = [
     },
   ),
   http.post<{ hash: string; number: string }>(
-    'http://192.168.1.106:3333/api/subtitles/translate',
+    '/api/subtitles/translate',
     async () => {
       const externalSubtitle: ExternalSubtitle = {
         name: 'new subtitles.srt',
@@ -8267,7 +8267,7 @@ export const handlers = [
     },
   ),
   http.post<{ hash: string; number: string }>(
-    'http://192.168.1.106:3333/api/subtitles/download',
+    '/api/subtitles/download',
     async () => {
       const externalSubtitle: ExternalSubtitle = {
         name: 'new subtitles.srt',

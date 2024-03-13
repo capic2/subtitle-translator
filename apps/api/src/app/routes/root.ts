@@ -160,7 +160,7 @@ export default async function (fastify: FastifyInstance) {
           message: 'No file uuid',
         };
       }
-      console.log({fileMap})
+
       const file = fileMap.get(uuid);
 
       if (!file) {

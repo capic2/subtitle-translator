@@ -33,7 +33,7 @@ describe('SubtitleNode', () => {
     await userEvent.click(await screen.findByRole('listitem'));
 
     expect(spy).toHaveBeenCalledWith(
-      'http://192.168.1.106:3333/api/subtitles/download',
+      '/api/subtitles/download',
       {
         link: '/abc.html',
         referer: '/a/b',
@@ -63,7 +63,7 @@ describe('SubtitleNode', () => {
     await userEvent.click(await screen.findByRole('listitem'));
 
     expect(spy).toHaveBeenCalledWith(
-      'http://192.168.1.106:3333/api/subtitles/translate',
+      '/api/subtitles/translate',
       {
         number: 3,
         uuid: '1',

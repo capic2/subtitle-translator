@@ -26,7 +26,7 @@ export const MultipleWithInProgress: Story = {
   parameters: {
     msw: [
       ...handlers,
-      http.post('http://192.168.1.106:3333/api/subtitles/translate', async() => {
+      http.post('http://localhost:3333/api/subtitles/translate', async() => {
         await delay(1000000)
 
         return HttpResponse.json('')

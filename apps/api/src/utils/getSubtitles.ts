@@ -85,7 +85,7 @@ export const getSubtitlesFromAddic7ed = async (file: dree.Dree) => {
     return addic7edSubtitles
       ? addic7edSubtitles.downloadableSubtitles.map((addic7edSubtitle) => ({
         uuid: uuidv4(),
-        language: 'fr',
+        language: addic7edSubtitle.lang,
         name: addic7edSubtitle.version,
         link: addic7edSubtitle.link,
         origin: 'Addic7ed',
