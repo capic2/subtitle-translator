@@ -15,14 +15,14 @@ test('it lists the available subtitles', async ({ page }) => {
     [
       'Addic7ed',
       [
-        'fr - KILLERS',
-        'fr - KILLERS',
-        'fr - WEBRip-NTb',
-        'fr - KILLERS',
-        'fr - WEBRip-NTb',
-        'fr - AMRAP+NTb+ION10',
-        'fr - AMRAP+NTb+ION10',
-        'fr - AMZN.WEB-DL.NTb',
+        'French - KILLERS',
+        'French - KILLERS',
+        'French - WEBRip-NTb',
+        'French - KILLERS',
+        'French - WEBRip-NTb',
+        'French - AMRAP+NTb+ION10',
+        'French - AMRAP+NTb+ION10',
+        'French - AMZN.WEB-DL.NTb',
       ],
     ],
     [
@@ -49,7 +49,7 @@ test('it downloads a subtitle from Addic7ed', async ({ page }) => {
 
   await page.waitForLoadState();
 
-  await  page.getByText('Addic7ed').getByText('fr - AMZN.WEB-DL.NTb').click();
+  await  page.getByText('Addic7ed').getByText('French - AMZN.WEB-DL.NTb').click();
 
   await page.waitForLoadState();
 
