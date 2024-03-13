@@ -9,7 +9,7 @@ interface Props {
 const SubtitleText = ({ subtitle, isLoading }: Props) => {
   return (
     <>
-      {subtitle.language ?? 'default'}
+      {subtitle.language ?? 'unknown'}
       {subtitle.name ? ` -  ${subtitle.name}` : null}
       {isLoading && (
         <ThreeDots role="progressbar" stroke="#000000" height={10} width={20} />

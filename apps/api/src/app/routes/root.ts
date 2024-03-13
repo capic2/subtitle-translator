@@ -331,7 +331,7 @@ export default async function (fastify: FastifyInstance) {
 
       reply.status(201).send({
         uuid: dree.uuid,
-        language: 'fr',
+        language,
         name: dree.name,
         origin: 'External',
       });
