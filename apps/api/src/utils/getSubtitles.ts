@@ -6,12 +6,15 @@ import { SubtitleParser } from 'matroska-subtitles';
 import search from '../addic7ed-api/search';
 
 import { v4 as uuidv4 } from 'uuid';
+import {
+  Addic7edSubtitle,
+  ExternalSubtitle,
+  InternalSubtitle,
+} from '@subtitle-translator/shared';
 
 export const getSubtitlesFromFile = async (
-  file: dree.Dree,
-): Promise<
-  { number?: number; language?: string; type?: string; name?: string }[]
-> => {
+  file: dree.Dree
+): Promise<InternalSubtitle[]> => {
   logger.debug(`Get subtitles from file ${file.name}`);
   const parser = new SubtitleParser();
 
@@ -24,7 +27,7 @@ export const getSubtitlesFromFile = async (
           ...track,
           origin: 'Internal',
           uuid: uuidv4(),
-        })),
+        }))
       );
     });
   });
@@ -34,11 +37,13 @@ export const getSubtitlesFromFile = async (
   return await promise;
 };
 
-export const getSubtitlesFromDirectory = (file: dree.Dree) => {
+export const getSubtitlesFromDirectory = (
+  file: dree.Dree
+): ExternalSubtitle[] => {
   logger.debug(
     `Get subtitle files from ${path.dirname(file.path)} for ${path.basename(
-      file.path,
-    )}`,
+      file.path
+    )}`
   );
   const subs = fs
     .readdirSync(path.dirname(file.path))
@@ -48,7 +53,7 @@ export const getSubtitlesFromDirectory = (file: dree.Dree) => {
         path
           .basename(fileName)
           .toLowerCase()
-          .includes(path.basename(file.path).toLowerCase()),
+          .includes(path.basename(file.path).toLowerCase())
     )
     .map((filteredFileName) => {
       logger.debug(`Get language from ${filteredFileName}`);
@@ -56,7 +61,7 @@ export const getSubtitlesFromDirectory = (file: dree.Dree) => {
       return {
         uuid: uuidv4(),
         language,
-        origin: 'External',
+        origin: 'External' as const,
         name: filteredFileName,
       };
     });
@@ -65,25 +70,26 @@ export const getSubtitlesFromDirectory = (file: dree.Dree) => {
   return subs;
 };
 
-export const getSubtitlesFromAddic7ed = async (file: dree.Dree) => {
-  try {
-    const show = path.dirname(file.path).split('/').at(-1);
-    const match = path.basename(file.path).match(/S([0-9]*)E([0-9]*)/i);
-    const season = match[1];
-    const episode = match[2];
-    logger.debug(`Search addic7ed subtitles for ${show} S${season}E${episode}`);
-    const addic7edSubtitles = await search({
-      show,
-      season,
-      episode,
-      languages: ['french', 'english'],
-    });
-    logger.debug(
-      `Subtitles found on addic7ed: ${JSON.stringify(addic7edSubtitles)}`,
-    );
+export const getSubtitlesFromAddic7ed = async (
+  file: dree.Dree
+): Promise<Addic7edSubtitle[]> => {
+  const show = path.dirname(file.path).split('/').at(-1);
+  const match = path.basename(file.path).match(/S([0-9]*)E([0-9]*)/i);
+  const season = match[1];
+  const episode = match[2];
+  logger.debug(`Search addic7ed subtitles for ${show} S${season}E${episode}`);
+  const addic7edSubtitles = await search({
+    show,
+    season,
+    episode,
+    languages: ['french', 'english'],
+  });
+  logger.debug(
+    `Subtitles found on addic7ed: ${JSON.stringify(addic7edSubtitles)}`
+  );
 
-    return addic7edSubtitles
-      ? addic7edSubtitles.downloadableSubtitles.map((addic7edSubtitle) => ({
+  return addic7edSubtitles
+    ? addic7edSubtitles.downloadableSubtitles.map((addic7edSubtitle) => ({
         uuid: uuidv4(),
         language: addic7edSubtitle.lang,
         name: addic7edSubtitle.version,
@@ -91,10 +97,5 @@ export const getSubtitlesFromAddic7ed = async (file: dree.Dree) => {
         origin: 'Addic7ed',
         referer: addic7edSubtitles.referer,
       }))
-      : [];
-  } catch(error) {
-    logger.error(`Error during getSubtitlesFromAddic7ed: ${error.message}`)
-    return []
-  }
-
+    : [];
 };

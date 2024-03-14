@@ -11,7 +11,14 @@ import {
   getSubtitlesFromDirectory,
   getSubtitlesFromFile,
 } from '../../utils/getSubtitles';
-import { ModifiedDree, SubInfo } from '@subtitle-translator/shared';
+import {
+  Addic7edSubtitle,
+  ExternalSubtitle,
+  InternalSubtitle,
+  ModifiedDree,
+  SubInfo,
+  Subtitles,
+} from '@subtitle-translator/shared';
 import download from '../../addic7ed-api/download';
 import * as process from 'node:process';
 
@@ -45,14 +52,16 @@ if (process.env.NODE_ENV === 'production') {
     },
   ];
 } else {
-  children = [{
-    name: 'Environement de développement',
-    path: 'data',
-    type: dree.Type.DIRECTORY,
-    relativePath: '.',
-    isSymbolicLink: false,
-    uuid: uuidv4(),
-  },];
+  children = [
+    {
+      name: 'Environement de développement',
+      path: 'data',
+      type: dree.Type.DIRECTORY,
+      relativePath: '.',
+      isSymbolicLink: false,
+      uuid: uuidv4(),
+    },
+  ];
 }
 
 export const directoryMap = new Map<string, dree.Dree>();
@@ -171,27 +180,37 @@ export default async function (fastify: FastifyInstance) {
         };
       }
 
+      let subtitlesFromDirectory: Subtitles = [],
+        subtitlesFromAddic7ed: Subtitles = [],
+        subtitlesFromFile: Subtitles = [];
       try {
-        const subtitlesFromDirectory = getSubtitlesFromDirectory(file);
+        subtitlesFromDirectory = getSubtitlesFromDirectory(file);
         logger.debug(
           `subtitlesFromDirectory: ${JSON.stringify(subtitlesFromDirectory)}`
         );
-        const subtitlesFromAddic7ed = await getSubtitlesFromAddic7ed(file);
+      } catch (error) {
+        logger.error(error.message);
+      }
+      try {
+        subtitlesFromAddic7ed = await getSubtitlesFromAddic7ed(file);
         logger.debug(
           `subtitlesFromAddic7ed: ${JSON.stringify(subtitlesFromAddic7ed)}`
         );
-        const subtitlesFromFile = await getSubtitlesFromFile(file);
+      } catch (error) {
+        logger.error(error.message);
+      }
+      try {
+        subtitlesFromFile = await getSubtitlesFromFile(file);
         logger.debug(`subtitlesFromFile: ${JSON.stringify(subtitlesFromFile)}`);
-
-        return [
-          ...subtitlesFromDirectory,
-          ...subtitlesFromFile,
-          ...subtitlesFromAddic7ed,
-        ];
       } catch (error) {
         logger.debug(`Error: ${error}`);
-        reply.send(error);
       }
+
+      return [
+        ...subtitlesFromDirectory,
+        ...subtitlesFromFile,
+        ...subtitlesFromAddic7ed,
+      ];
     }
   );
 

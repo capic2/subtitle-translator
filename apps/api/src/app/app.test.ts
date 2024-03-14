@@ -4,7 +4,12 @@ import * as dree from 'dree';
 import { Type } from 'dree';
 import * as root from './routes/root';
 import * as getSubtitles from '../utils/getSubtitles';
-import { ModifiedDree } from '@subtitle-translator/shared';
+import {
+  Addic7edSubtitle,
+  ExternalSubtitle,
+  InternalSubtitle,
+  ModifiedDree,
+} from '@subtitle-translator/shared';
 
 describe('app', () => {
   let server: FastifyInstance;
@@ -211,10 +216,10 @@ describe('app', () => {
     });
 
     describe('ok', () => {
-      const subtitlesFromDirectory = [
+      const subtitlesFromDirectory: ExternalSubtitle[] = [
         { uuid: '1', name: 'External', language: 'fr', origin: 'External' },
       ];
-      const subtitlesFromFile = [
+      const subtitlesFromFile: InternalSubtitle[] = [
         {
           uuid: '1',
           language: 'fr',
@@ -222,7 +227,7 @@ describe('app', () => {
           origin: 'Internal',
         },
       ];
-      const subtitlesFromAddic7ed = [
+      const subtitlesFromAddic7ed: Addic7edSubtitle[] = [
         {
           uuid: '1',
           language: 'fr',
@@ -247,7 +252,7 @@ describe('app', () => {
         jest.replaceProperty(root, 'fileMap', new Map([['1', file]]));
         jest
           .spyOn(getSubtitles, 'getSubtitlesFromDirectory')
-          .mockReturnValueOnce(subtitlesFromDirectory);
+          .mockReturnValue(subtitlesFromDirectory);
         jest
           .spyOn(getSubtitles, 'getSubtitlesFromFile')
           .mockResolvedValue(subtitlesFromFile);
@@ -273,6 +278,51 @@ describe('app', () => {
         expect(response.json()).toEqual([
           ...subtitlesFromDirectory,
           ...subtitlesFromFile,
+          ...subtitlesFromAddic7ed,
+        ]);
+      });
+      it('returns subtitles without addic7ed if it raises an error', async () => {
+        jest
+          .spyOn(getSubtitles, 'getSubtitlesFromAddic7ed')
+          .mockRejectedValue('');
+
+        const response = await server.inject({
+          method: 'GET',
+          url: '/api/files/1/subtitles',
+        });
+
+        expect(response.json()).toEqual([
+          ...subtitlesFromDirectory,
+          ...subtitlesFromFile,
+        ]);
+      });
+      it('returns subtitles without external if it raises an error', async () => {
+        jest
+          .spyOn(getSubtitles, 'getSubtitlesFromDirectory')
+          .mockImplementation(() => {
+            throw new Error('');
+          });
+
+        const response = await server.inject({
+          method: 'GET',
+          url: '/api/files/1/subtitles',
+        });
+
+        expect(response.json()).toEqual([
+          ...subtitlesFromFile,
+          ...subtitlesFromAddic7ed,
+        ]);
+      });
+      it('returns subtitles without internal if it raises an error', async () => {
+        jest.spyOn(getSubtitles, 'getSubtitlesFromFile').mockRejectedValue('');
+
+        const response = await server.inject({
+          method: 'GET',
+          url: '/api/files/1/subtitles',
+        });
+
+        expect(response.json()).toEqual([
+          ...subtitlesFromDirectory,
           ...subtitlesFromAddic7ed,
         ]);
       });
