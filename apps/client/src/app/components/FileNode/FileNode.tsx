@@ -10,7 +10,7 @@ const FileNode = ({ node }: { node: ModifiedDree<Dree> }) => {
   return (
     <li>
       <div onClick={() => setShowSubtitles(!showSubtitles)}>
-        <FcFile />
+        <FcFile title={`File-${node.uuid}`} />
         {node.name}
       </div>
       {showSubtitles && <SubtitlesNode uuid={node.uuid} />}

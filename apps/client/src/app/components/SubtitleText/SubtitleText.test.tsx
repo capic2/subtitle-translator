@@ -15,7 +15,7 @@ describe('SubtitleText', () => {
           uuid: '1',
         }}
         isLoading={false}
-      />,
+      />
     );
 
     expect(screen.getByText(/fr/)).toBeInTheDocument();
@@ -33,7 +33,7 @@ describe('SubtitleText', () => {
           uuid: '1',
         }}
         isLoading={false}
-      />,
+      />
     );
 
     expect(screen.getByText(/fr - the name/)).toBeInTheDocument();
@@ -51,9 +51,26 @@ describe('SubtitleText', () => {
           uuid: '1',
         }}
         isLoading={true}
-      />,
+      />
     );
 
     expect(screen.getByRole('progressbar')).toHaveClass('icon-loading');
+  });
+
+  it('set language to unknown if not defined', () => {
+    render(
+      <SubtitleText
+        subtitle={{
+          number: 1,
+          type: 'utf',
+          name: '',
+          origin: 'Internal',
+          uuid: '1',
+        }}
+        isLoading={false}
+      />
+    );
+
+    expect(screen.getByText('unknown')).toBeInTheDocument();
   });
 });
