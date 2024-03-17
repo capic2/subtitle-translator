@@ -185,7 +185,7 @@ export const handlers = [
       return HttpResponse.json<Subtitles>(subtitles ?? []);
     }
   ),
-  http.post<{}, { uuid: string; number: string }>(
+  http.post<never, { uuid: string; number: string }>(
     '/api/subtitles/translate',
     async ({ request }) => {
       const { number } = await request.json();

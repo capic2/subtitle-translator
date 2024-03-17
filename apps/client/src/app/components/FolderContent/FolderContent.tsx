@@ -45,9 +45,9 @@ const FolderContent = ({ uuid }: Props) => {
     <ul>
       {data.data.children?.map((child) =>
         child.type === Type.DIRECTORY ? (
-          <FolderNode node={child} />
+          <FolderNode key={child.uuid} node={child} />
         ) : (
-          <FileNode node={child} />
+          <FileNode key={child.uuid} node={child} />
         ),
       )}
     </ul>

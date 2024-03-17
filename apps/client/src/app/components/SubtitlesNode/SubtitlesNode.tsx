@@ -17,9 +17,7 @@ const fetchSubtitles = async (
   apiUrl: string,
   uuid: ModifiedDree<Dree>['uuid']
 ) => {
-  const { data } = await axios.get(
-    `${apiUrl}/api/files/${uuid}/subtitles`
-  );
+  const { data } = await axios.get(`${apiUrl}/api/files/${uuid}/subtitles`);
 
   const parsed = subtitlesSchema.safeParse(data);
   if (!parsed.success) {
@@ -54,11 +52,11 @@ const SubtitlesNode = ({ uuid }: Props) => {
 
   const addSubtitle = useCallback(
     (subtitle: Subtitle) => {
-      console.log({subtitle})
+      console.log({ subtitle });
       queryClient.setQueryData(
         ['fetchSubtitles', uuid],
         (prevSubtitleMap: Map<Origin, Subtitles> | undefined) => {
-          console.log(`will add subtitle ${subtitle}`)
+          console.log(`will add subtitle ${subtitle}`);
           const subtitleMap = new Map(prevSubtitleMap);
 
           const subtitles = subtitleMap?.get(subtitle.origin);
@@ -87,7 +85,7 @@ const SubtitlesNode = ({ uuid }: Props) => {
     <ul>
       {Array.from(data.entries()).map(([origin, subtitles]) => {
         return (
-          <li>
+          <li key={origin}>
             {origin}
             <ul>
               {subtitles.map((subtitle) => (
