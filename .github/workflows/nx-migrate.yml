@@ -23,6 +23,32 @@ jobs:
           echo $IS_OUTDATED
           echo "outdated=$IS_OUTDATED" >> $GITHUB_OUTPUT
 
+      - name: Send mail
+        #if: steps.nrwl-workspace-outdated.outputs.outdated == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          # Specify connection via URL (replaces server_address, server_port, secure,
+          # username and password)
+          #
+          # Format:
+          #
+          #  * smtp://user:password@server:port
+          #  * smtp+starttls://user:password@server:port
+#          connection_url: ${{secrets.MAIL_CONNECTION}}
+          # Required mail server address if not connection_url:
+          server_address: smtp.gmail.com
+          # Server port, default 25:
+          server_port: 465
+          # Optional whether this connection use TLS (default is true if server_port is 465)
+          secure: true
+          # Required mail subject:
+          subject: Check if @nx/workspace is outdated
+          # Required recipients' addresses:
+          to: vcapic@gmail.com
+          # Required sender full name (address can be skipped):
+          from: CI subtitle translator
+          body: There is an update for nx workspace
+
       - name: Update @nx/workspace
         if: steps.nrwl-workspace-outdated.outputs.outdated == 'true'
         run: yarn nx migrate latest
