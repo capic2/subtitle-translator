@@ -212,11 +212,19 @@ export default async function (fastify: FastifyInstance) {
     (request, reply) => {
       const { uuid, number } = request.body;
 
-      if (!uuid || !number) {
-        logger.error(`No uuid or number provided`);
+      if (!uuid) {
+        logger.error(`No uuid provided`);
         return {
           status: false,
-          message: 'No file uuid or track number',
+          message: 'No file uuid',
+        };
+      }
+
+      if (!number) {
+        logger.error(`No number provided`);
+        return {
+          status: false,
+          message: 'No track number',
         };
       }
 

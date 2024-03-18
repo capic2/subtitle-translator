@@ -11,7 +11,13 @@ import {
   ModifiedDree,
 } from '@subtitle-translator/shared';
 import * as download from '../addic7ed-api/download';
-import { after } from '@nx/js/src/utils/typescript/__mocks__/plugin-b';
+import * as child_process from 'child_process';
+import fs from 'fs';
+
+jest.mock('child_process', () => ({
+  ...jest.requireActual('node:child_process'),
+  execSync: jest.fn(),
+}));
 
 describe('app', () => {
   let server: FastifyInstance;
@@ -333,20 +339,170 @@ describe('app', () => {
 
   describe('/api/subtitles/translate', () => {
     describe('no uuid', () => {
-      it.todo('returns an error message');
+      it('returns an error message', async () => {
+        const response = await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/translate',
+          body: {
+            number: 1,
+          },
+        });
+
+        expect(response.json()).toEqual({
+          status: false,
+          message: `No file uuid`,
+        });
+      });
       it.todo('returns an error code');
     });
     describe('no number', () => {
-      it.todo('returns an error message');
+      it('returns an error message', async () => {
+        const response = await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/translate',
+          body: {
+            uuid: '1',
+          },
+        });
+
+        expect(response.json()).toEqual({
+          status: false,
+          message: `No track number`,
+        });
+      });
       it.todo('returns an error code');
     });
     describe('no file found', () => {
       it.todo('returns an error message');
-      it.todo('returns an error code');
+      it('returns an error code', async () => {
+        jest.replaceProperty(
+          root,
+          'fileMap',
+          new Map<string, dree.Dree>([
+            [
+              '2',
+              {
+                name: 'b',
+                path: 'b',
+                type: Type.FILE,
+                relativePath: '',
+                isSymbolicLink: false,
+              },
+            ],
+          ])
+        );
+
+        const response = await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/translate',
+          body: {
+            uuid: '1',
+            number: 1,
+          },
+        });
+
+        expect(response.json()).toEqual({
+          status: false,
+          message: `No file found with uuid: 1`,
+        });
+      });
     });
 
-    it.todo('translates the subtitle');
-    it.todo('returns the translated subtitle');
+    describe('ok', () => {
+      const execSyncSpy = jest
+        .spyOn(child_process, 'execSync')
+        .mockReturnValue('');
+      const rmSyncSpy = jest.spyOn(fs, 'rmSync').mockImplementation(() => {
+        /*no-op*/
+      });
+      const copyFileSyncSpy = jest
+        .spyOn(fs, 'copyFileSync')
+        .mockImplementation(() => {
+          /*no-op*/
+        });
+
+      beforeEach(() => {
+        jest.replaceProperty(
+          root,
+          'fileMap',
+          new Map<string, dree.Dree>([
+            [
+              '1',
+              {
+                name: 'b',
+                path: 'b',
+                type: Type.FILE,
+                relativePath: '',
+                isSymbolicLink: false,
+              },
+            ],
+          ])
+        );
+      });
+
+      afterEach(() => {
+        execSyncSpy.mockReset();
+        rmSyncSpy.mockReset();
+        copyFileSyncSpy.mockReset();
+      });
+
+      it('translates the subtitle', async () => {
+        await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/translate',
+          body: {
+            uuid: '1',
+            number: 1,
+          },
+        });
+
+        expect(execSyncSpy).toHaveBeenCalledWith(
+          `mkvextract tracks "b" 0:"/data/temp/b.srt"`
+        );
+        expect(execSyncSpy).toHaveBeenCalledWith(
+          `subtrans translate "/data/temp/b.srt" --src en --dest fr`
+        );
+        expect(rmSyncSpy).toHaveBeenCalledWith(`/data/temp/b.srt`);
+        expect(copyFileSyncSpy).toHaveBeenCalledWith(
+          `/data/temp/b.fr.srt`,
+          `./b.fr.srt`
+        );
+        expect(rmSyncSpy).toHaveBeenCalledWith(`/data/temp/b.fr.srt`);
+      });
+
+      it('returns status 201', async () => {
+        const response = await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/translate',
+          body: {
+            uuid: '1',
+            number: 1,
+          },
+        });
+
+        expect(response.statusCode).toStrictEqual(201);
+      });
+
+      it('returns the translated subtitle', async () => {
+        const response = await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/translate',
+          body: {
+            uuid: '1',
+            number: 1,
+          },
+        });
+
+        expect(response.json()).toStrictEqual({
+          uuid: expect.stringMatching(
+            /[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}/
+          ),
+          language: 'fr',
+          name: 'b.fr.srt',
+          origin: 'External',
+        });
+      });
+    });
   });
 
   describe('/api/subtitles/download', () => {
