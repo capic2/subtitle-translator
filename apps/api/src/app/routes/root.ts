@@ -11,14 +11,7 @@ import {
   getSubtitlesFromDirectory,
   getSubtitlesFromFile,
 } from '../../utils/getSubtitles';
-import {
-  Addic7edSubtitle,
-  ExternalSubtitle,
-  InternalSubtitle,
-  ModifiedDree,
-  SubInfo,
-  Subtitles,
-} from '@subtitle-translator/shared';
+import { ModifiedDree, SubInfo, Subtitles } from '@subtitle-translator/shared';
 import download from '../../addic7ed-api/download';
 import * as process from 'node:process';
 

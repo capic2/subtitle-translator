@@ -10,7 +10,7 @@ import {
   InternalSubtitle,
   ModifiedDree,
 } from '@subtitle-translator/shared';
-import * as download from '../addic7ed-api/download'
+import * as download from '../addic7ed-api/download';
 import { after } from '@nx/js/src/utils/typescript/__mocks__/plugin-b';
 
 describe('app', () => {
@@ -444,7 +444,11 @@ describe('app', () => {
     });
 
     describe('ok', () => {
-      const spy = jest.spyOn(download, 'default').mockImplementation(async () => {});
+      const spy = jest
+        .spyOn(download, 'default')
+        .mockImplementation(async () => {
+          /*no-op*/
+        });
 
       beforeEach(() => {
         jest.replaceProperty(
@@ -463,10 +467,10 @@ describe('app', () => {
             ],
           ])
         );
-      })
+      });
       afterEach(() => {
-        spy.mockReset()
-      })
+        spy.mockReset();
+      });
       it('responds with 201', async () => {
         const response = await server.inject({
           method: 'POST',
@@ -478,8 +482,8 @@ describe('app', () => {
             link: 'a',
           },
         });
-        expect(response.statusCode).toStrictEqual(201)
-      })
+        expect(response.statusCode).toStrictEqual(201);
+      });
       it('downloads the file', async () => {
         await server.inject({
           method: 'POST',
@@ -492,7 +496,10 @@ describe('app', () => {
           },
         });
 
-        expect(spy).toHaveBeenCalledWith({link: 'a',referer: 'a',}, `b.a.srt`)
+        expect(spy).toHaveBeenCalledWith(
+          { link: 'a', referer: 'a' },
+          `b.a.srt`
+        );
       });
       it('returns the downloaded file', async () => {
         const response = await server.inject({
@@ -513,9 +520,8 @@ describe('app', () => {
           language: 'a',
           name: 'b.a.srt',
           origin: 'External',
-        })
+        });
       });
-    })
-
+    });
   });
 });

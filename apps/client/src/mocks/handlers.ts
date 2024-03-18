@@ -203,7 +203,7 @@ export const handlers = [
     }
   ),
   http.post<
-    {},
+    never,
     {
       uuid: string;
       referer: SubInfo['referer'];
