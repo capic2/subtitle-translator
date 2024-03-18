@@ -10,6 +10,8 @@ import {
   InternalSubtitle,
   ModifiedDree,
 } from '@subtitle-translator/shared';
+import * as download from '../addic7ed-api/download'
+import { after } from '@nx/js/src/utils/typescript/__mocks__/plugin-b';
 
 describe('app', () => {
   let server: FastifyInstance;
@@ -349,23 +351,171 @@ describe('app', () => {
 
   describe('/api/subtitles/download', () => {
     describe('no uuid', () => {
-      it.todo('returns an error message');
+      it('returns an error message', async () => {
+        const response = await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/download',
+          body: {
+            referer: 'a',
+            link: 'a',
+          },
+        });
+
+        expect(response.json()).toEqual({
+          status: false,
+          message: `No uuid`,
+        });
+      });
       it.todo('returns an error code');
     });
     describe('no referer', () => {
-      it.todo('returns an error message');
+      it('returns an error message', async () => {
+        const response = await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/download',
+          body: {
+            uuid: 'a',
+            link: 'a',
+          },
+        });
+
+        expect(response.json()).toEqual({
+          status: false,
+          message: `No referer`,
+        });
+      });
       it.todo('returns an error code');
     });
     describe('no link', () => {
-      it.todo('returns an error message');
+      it('returns an error message', async () => {
+        const response = await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/download',
+          body: {
+            language: '',
+            referer: '',
+            uuid: '',
+          },
+        });
+
+        expect(response.json()).toEqual({
+          status: false,
+          message: `No link`,
+        });
+      });
       it.todo('returns an error code');
     });
     describe('no file found', () => {
-      it.todo('returns an error message');
+      it('returns an error message', async () => {
+        jest.replaceProperty(
+          root,
+          'fileMap',
+          new Map<string, dree.Dree>([
+            [
+              '2',
+              {
+                name: 'b',
+                path: 'b',
+                type: Type.FILE,
+                relativePath: '',
+                isSymbolicLink: false,
+              },
+            ],
+          ])
+        );
+
+        const response = await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/download',
+          body: {
+            language: 'a',
+            referer: 'a',
+            uuid: '1',
+            link: 'a',
+          },
+        });
+
+        expect(response.json()).toEqual({
+          status: false,
+          message: `No file found with uuid: 1`,
+        });
+      });
       it.todo('returns an error code');
     });
 
-    it.todo('download the file');
-    it.todo('returns the downloaded file');
+    describe('ok', () => {
+      const spy = jest.spyOn(download, 'default').mockImplementation(async () => {});
+
+      beforeEach(() => {
+        jest.replaceProperty(
+          root,
+          'fileMap',
+          new Map<string, dree.Dree>([
+            [
+              '1',
+              {
+                name: 'b',
+                path: 'b',
+                type: Type.FILE,
+                relativePath: '',
+                isSymbolicLink: false,
+              },
+            ],
+          ])
+        );
+      })
+      afterEach(() => {
+        spy.mockReset()
+      })
+      it('responds with 201', async () => {
+        const response = await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/download',
+          body: {
+            language: 'a',
+            referer: 'a',
+            uuid: '1',
+            link: 'a',
+          },
+        });
+        expect(response.statusCode).toStrictEqual(201)
+      })
+      it('downloads the file', async () => {
+        await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/download',
+          body: {
+            language: 'a',
+            referer: 'a',
+            uuid: '1',
+            link: 'a',
+          },
+        });
+
+        expect(spy).toHaveBeenCalledWith({link: 'a',referer: 'a',}, `b.a.srt`)
+      });
+      it('returns the downloaded file', async () => {
+        const response = await server.inject({
+          method: 'POST',
+          url: '/api/subtitles/download',
+          body: {
+            language: 'a',
+            referer: 'a',
+            uuid: '1',
+            link: 'a',
+          },
+        });
+
+        expect(response.json()).toStrictEqual({
+          uuid: expect.stringMatching(
+            /[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}/
+          ),
+          language: 'a',
+          name: 'b.a.srt',
+          origin: 'External',
+        })
+      });
+    })
+
   });
 });

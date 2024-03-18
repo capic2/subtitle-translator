@@ -314,11 +314,27 @@ export default async function (fastify: FastifyInstance) {
     async (request, reply) => {
       const { referer, link, uuid, language } = request.body;
 
-      if (!link || !referer || !uuid) {
-        logger.error(`No referer or link or uuid provided`);
+      if (!link) {
+        logger.error(`No link provided`);
         return {
           status: false,
-          message: 'No referer uuid or link or uuid',
+          message: 'No link',
+        };
+      }
+
+      if (!referer) {
+        logger.error(`No referer provided`);
+        return {
+          status: false,
+          message: 'No referer',
+        };
+      }
+
+      if (!uuid) {
+        logger.error(`No uuid provided`);
+        return {
+          status: false,
+          message: 'No uuid',
         };
       }
 
