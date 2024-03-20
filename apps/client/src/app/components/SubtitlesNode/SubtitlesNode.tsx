@@ -52,11 +52,9 @@ const SubtitlesNode = ({ uuid }: Props) => {
 
   const addSubtitle = useCallback(
     (subtitle: Subtitle) => {
-      console.log({ subtitle });
       queryClient.setQueryData(
         ['fetchSubtitles', uuid],
         (prevSubtitleMap: Map<Origin, Subtitles> | undefined) => {
-          console.log(`will add subtitle ${subtitle}`);
           const subtitleMap = new Map(prevSubtitleMap);
 
           const subtitles = subtitleMap?.get(subtitle.origin);

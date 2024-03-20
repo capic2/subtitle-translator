@@ -212,7 +212,6 @@ export const handlers = [
     }
   >('/api/subtitles/download', async ({ request }) => {
     const { uuid, referer, language } = await request.json();
-    console.log({uuid, referer, language})
     const subtitle = subtitleMap.get(uuid)?.find((subtitle) => {
       return (
         subtitle.origin === 'Addic7ed' &&

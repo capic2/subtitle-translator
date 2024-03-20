@@ -17,8 +17,6 @@ export const AppConfigProvider = ({
     throw new Error('No base url provider');
   }
 
-  console.log(`Backend url: ${apiUrl}`);
-
   return (
     <AppConfigContext.Provider value={{ apiUrl: apiUrl }}>
       {children}
