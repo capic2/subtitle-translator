@@ -21,9 +21,10 @@ const internalSubtitleSchema = z.object({
 });
 const externalSubtitleSchema = z.object({
   uuid: z.string(),
+  path: z.string(),
   language: z.string().optional(),
   name: z.string().optional(),
-  origin: z.literal(originSchema.Values.External),
+  origin: z.literal(originSchema.Values.External)
 });
 const addic7edSubtitleSchema = z.object({
   uuid: z.string(),

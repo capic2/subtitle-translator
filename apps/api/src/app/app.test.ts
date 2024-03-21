@@ -9,6 +9,7 @@ import {
   ExternalSubtitle,
   InternalSubtitle,
   ModifiedDree,
+  Subtitle,
 } from '@subtitle-translator/shared';
 import * as download from '../addic7ed-api/download';
 import * as child_process from 'child_process';
@@ -31,7 +32,7 @@ describe('app', () => {
     jest.resetAllMocks();
   });
 
-  describe('/api/files', () => {
+  describe('GET /api/files', () => {
     it('responds with 200', async () => {
       const response = await server.inject({
         method: 'GET',
@@ -70,7 +71,7 @@ describe('app', () => {
     });
   });
 
-  describe('/api/directories/:uuid/files', () => {
+  describe('GET /api/directories/:uuid/files', () => {
     describe('no uuid', () => {
       it('returns an error message', async () => {
         const response = await server.inject({
@@ -213,7 +214,7 @@ describe('app', () => {
     });
   });
 
-  describe('/api/files/:uuid/subtitles', () => {
+  describe('GET /api/files/:uuid/subtitles', () => {
     describe('no uuid', () => {
       it.todo('returns an error message');
       it.todo('returns an error code');
@@ -337,7 +338,7 @@ describe('app', () => {
     });
   });
 
-  describe('/api/subtitles/translate', () => {
+  describe('POST /api/subtitles/translate', () => {
     describe('no uuid', () => {
       it('returns an error message', async () => {
         const response = await server.inject({
@@ -505,7 +506,7 @@ describe('app', () => {
     });
   });
 
-  describe('/api/subtitles/download', () => {
+  describe('POST /api/subtitles/download', () => {
     describe('no uuid', () => {
       it('returns an error message', async () => {
         const response = await server.inject({
@@ -677,6 +678,108 @@ describe('app', () => {
           name: 'b.a.srt',
           origin: 'External',
         });
+      });
+    });
+  });
+
+  describe('DELETE /api/subtitles/:uuid', () => {
+    describe('no uuid', () => {
+      it('returns an error message', async () => {
+        const response = await server.inject({
+          method: 'DELETE',
+          url: '/api/subtitles/',
+        });
+
+        expect(response.json()).toEqual({
+          status: false,
+          message: `No uuid`,
+        });
+      });
+      it.todo('returns an error code');
+    });
+    describe('no file found', () => {
+      it('returns an error message', async () => {
+        const response = await server.inject({
+          method: 'DELETE',
+          url: '/api/subtitles/1',
+        });
+
+        expect(response.json()).toEqual({
+          status: false,
+          message: `No subtitle found with uuid: 1`,
+        });
+      });
+      it.todo('returns an error code');
+    });
+    describe('file found but not external', () => {
+      it('returns an error message', async () => {
+        const subtitle: InternalSubtitle = {
+          uuid: '2',
+          origin: 'Internal',
+          name: 'a',
+          type: 'a',
+          language: 'a',
+          number: 1,
+        };
+        jest.replaceProperty(
+          root,
+          'subtitleMap',
+          new Map<string, Subtitle>([[subtitle.uuid, subtitle]])
+        );
+
+        const response = await server.inject({
+          method: 'DELETE',
+          url: '/api/subtitles/1',
+        });
+
+        expect(response.json()).toEqual({
+          status: false,
+          message: `No subtitle found with uuid: 1`,
+        });
+      });
+      it.todo('returns an error code');
+    });
+    describe('ok', () => {
+      const rmSyncSpy = jest.spyOn(fs, 'rmSync').mockImplementation(() => {
+        /*no-op*/
+      });
+
+      const subtitle: ExternalSubtitle = {
+        uuid: '1',
+        origin: 'External',
+        name: 'a',
+        language: 'a',
+        path: 'a/a.srt',
+      };
+
+      beforeEach(() => {
+        jest.replaceProperty(
+          root,
+          'subtitleMap',
+          new Map<string, Subtitle>([[subtitle.uuid, subtitle]])
+        );
+      });
+
+      afterEach(() => {
+        rmSyncSpy.mockReset();
+      });
+
+      it('deletes the file', async () => {
+        await server.inject({
+          method: 'DELETE',
+          url: '/api/subtitles/1',
+        });
+
+        expect(rmSyncSpy).toHaveBeenCalledWith(subtitle.path);
+      });
+
+      it('returns a message', async () => {
+        const response = await server.inject({
+          method: 'DELETE',
+          url: '/api/subtitles/1',
+        });
+
+        expect(response.body).toStrictEqual(`Subtitle ${subtitle.path} deleted`);
       });
     });
   });

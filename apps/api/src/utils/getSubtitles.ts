@@ -60,6 +60,7 @@ export const getSubtitlesFromDirectory = (
       const language = filteredFileName.split('.').at(-2);
       return {
         uuid: uuidv4(),
+        path: `${path.dirname(file.path)}/${filteredFileName}`,
         language,
         origin: 'External' as const,
         name: filteredFileName,

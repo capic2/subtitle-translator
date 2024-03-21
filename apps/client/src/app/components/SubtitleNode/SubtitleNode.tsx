@@ -1,9 +1,8 @@
 import SubtitleText from '../SubtitleText/SubtitleText';
 import {
-  Addic7edSubtitle,
-  InternalSubtitle,
+   isAddic7edSubtitle, isInternalSubtitle,
   SubInfo,
-  Subtitle,
+  Subtitle
 } from '@subtitle-translator/shared';
 import { useMutation } from '@tanstack/react-query';
 import axios, { AxiosResponse } from 'axios';
@@ -14,17 +13,6 @@ interface Props {
   subtitle: Subtitle;
   addSubtitle: (subtitle: Subtitle) => void;
 }
-
-const isInternalSubtitle = (
-  subtitle: Subtitle
-): subtitle is InternalSubtitle => {
-  return subtitle.origin === 'Internal';
-};
-const isAddic7edSubtitle = (
-  subtitle: Subtitle
-): subtitle is Addic7edSubtitle => {
-  return subtitle.origin === 'Addic7ed';
-};
 
 const SubtitleNode = ({ fileUuid, subtitle, addSubtitle }: Props) => {
   const { apiUrl } = useAppConfigProvider();
@@ -102,6 +90,7 @@ const SubtitleNode = ({ fileUuid, subtitle, addSubtitle }: Props) => {
   return (
     <li onClick={handleSubtitleAction}>
       <SubtitleText
+        fileUuid={fileUuid}
         subtitle={subtitle}
         isLoading={mutationTranslate.isPending || mutationDownload.isPending}
       />

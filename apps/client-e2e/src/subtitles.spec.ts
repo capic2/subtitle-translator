@@ -75,3 +75,19 @@ test('it translates a subtitle from a file', async ({page}) => {
 
   expect(page.getByText('External').getByText('default - fr')).toBeDefined()
 });
+
+test('it removes an external subtitle', async ({page}) => {
+  await page.goto('/');
+
+  await page.getByText('data').click();
+  await page.getByText('Evil').click();
+  await page.getByText('Evil.S01E01.mkv').click();
+
+  await page.waitForLoadState();
+
+  await page.getByRole().click()
+
+  await page.waitForLoadState();
+
+  expect().not.toBeDefined()
+})

@@ -11,7 +11,16 @@ import {
   getSubtitlesFromDirectory,
   getSubtitlesFromFile,
 } from '../../utils/getSubtitles';
-import { ModifiedDree, SubInfo, Subtitles } from '@subtitle-translator/shared';
+import {
+  Addic7edSubtitle,
+  ExternalSubtitle,
+  InternalSubtitle,
+  isExternalSubtitle,
+  ModifiedDree,
+  SubInfo,
+  Subtitle,
+  Subtitles,
+} from '@subtitle-translator/shared';
 import download from '../../addic7ed-api/download';
 import * as process from 'node:process';
 
@@ -59,6 +68,7 @@ if (process.env.NODE_ENV === 'production') {
 
 export const directoryMap = new Map<string, dree.Dree>();
 export const fileMap = new Map<string, dree.Dree>();
+export const subtitleMap = new Map<string, Subtitle>();
 
 const fileCallback = function (file: ModifiedDree<dree.Dree>) {
   file.uuid = uuidv4();
@@ -152,7 +162,7 @@ export default async function (fastify: FastifyInstance) {
 
   fastify.get<{ Params: { uuid: string } }>(
     '/api/files/:uuid/subtitles',
-    async (request, reply) => {
+    async (request) => {
       const { uuid } = request.params;
 
       if (!uuid) {
@@ -173,9 +183,9 @@ export default async function (fastify: FastifyInstance) {
         };
       }
 
-      let subtitlesFromDirectory: Subtitles = [],
-        subtitlesFromAddic7ed: Subtitles = [],
-        subtitlesFromFile: Subtitles = [];
+      let subtitlesFromDirectory: ExternalSubtitle[] = [],
+        subtitlesFromAddic7ed: Addic7edSubtitle[] = [],
+        subtitlesFromFile: InternalSubtitle[] = [];
       try {
         subtitlesFromDirectory = getSubtitlesFromDirectory(file);
         logger.debug(
@@ -199,11 +209,17 @@ export default async function (fastify: FastifyInstance) {
         logger.debug(`Error: ${error}`);
       }
 
-      return [
+      const allSubtitles = [
         ...subtitlesFromDirectory,
         ...subtitlesFromFile,
         ...subtitlesFromAddic7ed,
       ];
+
+      allSubtitles.forEach((subtitle) => {
+        subtitleMap.set(subtitle.uuid, subtitle);
+      });
+
+      return allSubtitles;
     }
   );
 
@@ -371,6 +387,43 @@ export default async function (fastify: FastifyInstance) {
         name: dree.name,
         origin: 'External',
       });
+    }
+  );
+
+  fastify.delete<{ Params: { uuid: string } }>(
+    '/api/subtitles/:uuid',
+    async (request, reply) => {
+      const { uuid } = request.params;
+
+      if (!uuid) {
+        logger.error(`No uuid provided`);
+        return {
+          status: false,
+          message: 'No uuid',
+        };
+      }
+
+      const subtitle = subtitleMap.get(uuid);
+
+      if (!subtitle || !isExternalSubtitle(subtitle)) {
+        logger.error(`No subtitle found with ${uuid}`);
+        return {
+          status: false,
+          message: `No subtitle found with uuid: ${uuid}`,
+        };
+      }
+
+      try {
+        fs.rmSync(subtitle.path);
+      } catch (error) {
+        logger.error(`Cannot delete subtitle file: ${subtitle.path}`);
+        return {
+          status: false,
+          message: `Cannot delete subtitle file: ${subtitle.path}`,
+        };
+      }
+
+      reply.status(200).send(`Subtitle ${subtitle.path} deleted`);
     }
   );
 
