@@ -229,5 +229,7 @@ export const handlers = [
 
     return HttpResponse.json(externalSubtitle, { status: 201 });
   }),
-  http.delete('/api/subtitles/:uuid', async () => {}),
+  http.delete('/api/subtitles/:uuid', async () => {
+    return HttpResponse.text('')
+  }),
 ];

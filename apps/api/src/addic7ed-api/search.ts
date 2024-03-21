@@ -3,7 +3,7 @@ import { addic7edURL, formatShowNumber, headers } from './helpers';
 import logger from '../utils/logger';
 import axios from 'axios';
 import { parse, HTMLElement } from 'node-html-parser';
-import download from './download';
+import axiosRetry from 'axios-retry';
 
 export default async function search({
   show,
@@ -16,6 +16,8 @@ export default async function search({
   episode?: string;
   languages?: string[];
 }) {
+  axiosRetry(axios, { retries: 5 });
+
   const searchTitle =
     `${show.trim()} ${season ? formatShowNumber(season) : ''} ${episode ? formatShowNumber(episode) : ''}`.trim();
   const addic7edSearchURL = `${addic7edURL}/srch.php?search=${searchTitle}&Submit=Search`;

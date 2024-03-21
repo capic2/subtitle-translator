@@ -23,6 +23,7 @@ import {
 } from '@subtitle-translator/shared';
 import download from '../../addic7ed-api/download';
 import * as process from 'node:process';
+import { langs } from '../../addic7ed-api/helpers';
 
 let children: ModifiedDree<dree.Dree>[];
 if (process.env.NODE_ENV === 'production') {
@@ -268,7 +269,7 @@ export default async function (fastify: FastifyInstance) {
         );
 
         // the *entire* stdout and stderr (buffered)
-        console.info(stdoutMkvextract);
+
         //console.log(`stderr: ${stderr}`);
         /* fs.copyFileSync(`/data/temp/${path.basename(filePath)}.srt`,
         `/data/input/${path.basename(filePath)}.srt`) */
@@ -283,8 +284,6 @@ export default async function (fastify: FastifyInstance) {
             file.path
           )}.srt" --src en --dest fr`
         );
-
-        console.info(stdoutSubtrans);
 
         logger.debug(`remove /data/temp/${path.basename(file.path)}.srt`);
         fs.rmSync(`/data/temp/${path.basename(file.path)}.srt`);
@@ -368,12 +367,13 @@ export default async function (fastify: FastifyInstance) {
       logger.debug(
         `Download file ${file.path}.srt with link ${link} and referer ${referer}`
       );
-      await download({ link, referer }, `${file.path}.${language}.srt`);
+      const subtitlePath = `${file.path}.${langs[language.toLowerCase()]}.srt`
+      await download({ link, referer }, subtitlePath);
 
       const dree: ModifiedDree<dree.Dree> = {
         uuid: uuidv4(),
-        name: `${path.basename(file.path)}.${language}.srt`,
-        path: `${path.dirname(file.path)}/${file.path}.${language}.srt`,
+        name: `${path.basename(subtitlePath)}`,
+        path: subtitlePath,
         type: Type.FILE,
         relativePath: '.',
         isSymbolicLink: false,

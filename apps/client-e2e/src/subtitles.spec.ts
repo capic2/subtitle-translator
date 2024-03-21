@@ -67,13 +67,14 @@ test('it translates a subtitle from a file', async ({page}) => {
 
   await page.getByText('data').click();
   await page.getByText('Evil').click();
-  await page.getByText('Evil.S01E01.mkv').click();
-
+  const video = page.getByText('Evil.S01E01.mkv')
+  await video.click();
   await page.waitForLoadState();
+  const internalSubtitle = video.getByText('Internal').getByText('unknown')
+  await internalSubtitle.click()
+  const external =video.getByText('External')
 
-  page.getByText('Internal').getByText('default')
-
-  expect(page.getByText('External').getByText('default - fr')).toBeDefined()
+  expect(external.getByText('default - fr')).toBeDefined()
 });
 
 test('it removes an external subtitle', async ({page}) => {
@@ -81,13 +82,17 @@ test('it removes an external subtitle', async ({page}) => {
 
   await page.getByText('data').click();
   await page.getByText('Evil').click();
-  await page.getByText('Evil.S01E01.mkv').click();
+  const video = page.getByText('Evil.S01E01.mkv')
+  await video.click();
+  await page.waitForLoadState();
+  const internalSubtitle = video.getByText('Internal').getByText('unknown')
+  await internalSubtitle.click()
+  const external =video.getByText('External')
 
+  expect(external.getByText('default - fr')).toBeDefined()
+
+  await external.getByRole('button', {name : 'trash'}).click()
   await page.waitForLoadState();
 
-  await page.getByRole().click()
-
-  await page.waitForLoadState();
-
-  expect().not.toBeDefined()
+  expect(external.getByText('default - fr')).not.toBeDefined()
 })

@@ -105,7 +105,7 @@ describe('SubtitleText', () => {
     );
 
     expect(
-      screen.getByRole('button', { name: 'trash' })
+      screen.queryByRole('button', { name: 'trash' })
     ).not.toBeInTheDocument();
   });
   it('does not render the trash if addicted', async () => {
@@ -124,7 +124,7 @@ describe('SubtitleText', () => {
     );
 
     expect(
-      screen.getByRole('button', { name: 'trash' })
+      screen.queryByRole('button', { name: 'trash' })
     ).not.toBeInTheDocument();
   });
 
@@ -146,26 +146,5 @@ describe('SubtitleText', () => {
     );
 
     expect(screen.getByText('unknown')).toBeInTheDocument();
-  });
-
-  it('it deletes a file', async () => {
-    const subtitle: ExternalSubtitle = {
-      origin: 'External',
-      uuid: '1',
-      name: 'external subtitle',
-      path: '/path/external/subtitle',
-      language: 'fr',
-    };
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <SubtitleText subtitle={subtitle} isLoading={false} fileUuid="1" />
-      </QueryClientProvider>
-    );
-
-    expect(screen.getByText(subtitle.name!)).toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole('button', { name: 'trash' }));
-
-    expect(screen.getByText(subtitle.name!)).not.toBeInTheDocument();
   });
 });

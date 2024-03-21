@@ -9,3 +9,8 @@ export function formatShowNumber(number: string) {
   const i = parseInt(number, 10);
   return i < 10 ? '0' + String(i) : String(i);
 }
+
+export const langs = {
+  'french': 'fr',
+  'english': 'en'
+} as const

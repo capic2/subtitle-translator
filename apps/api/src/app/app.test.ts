@@ -615,8 +615,8 @@ describe('app', () => {
             [
               '1',
               {
-                name: 'b',
-                path: 'b',
+                name: 'file1.mkv',
+                path: 'directory1/file1.mkv',
                 type: Type.FILE,
                 relativePath: '',
                 isSymbolicLink: false,
@@ -633,7 +633,7 @@ describe('app', () => {
           method: 'POST',
           url: '/api/subtitles/download',
           body: {
-            language: 'a',
+            language: 'French',
             referer: 'a',
             uuid: '1',
             link: 'a',
@@ -646,16 +646,16 @@ describe('app', () => {
           method: 'POST',
           url: '/api/subtitles/download',
           body: {
-            language: 'a',
-            referer: 'a',
+            language: 'French',
+            referer: 'referer',
             uuid: '1',
-            link: 'a',
+            link: 'link',
           },
         });
 
         expect(spy).toHaveBeenCalledWith(
-          { link: 'a', referer: 'a' },
-          `b.a.srt`
+          { link: 'link', referer: 'referer' },
+          `directory1/file1.mkv.fr.srt`
         );
       });
       it('returns the downloaded file', async () => {
@@ -663,10 +663,10 @@ describe('app', () => {
           method: 'POST',
           url: '/api/subtitles/download',
           body: {
-            language: 'a',
-            referer: 'a',
+            language: 'French',
+            referer: 'referer',
             uuid: '1',
-            link: 'a',
+            link: 'link',
           },
         });
 
@@ -674,8 +674,8 @@ describe('app', () => {
           uuid: expect.stringMatching(
             /[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}/
           ),
-          language: 'a',
-          name: 'b.a.srt',
+          language: 'French',
+          name: 'file1.mkv.fr.srt',
           origin: 'External',
         });
       });
