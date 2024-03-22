@@ -78,6 +78,8 @@ test('it translates a subtitle from a file', async ({page}) => {
 });
 
 test('it removes an external subtitle', async ({page}) => {
+  fs.copyFileSync(`${workspaceRoot}/data/Evil/Evil.S01E01.mkv.fr.srt`, `${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`)
+
   await page.goto('/');
 
   await page.getByText('data').click();
@@ -85,14 +87,12 @@ test('it removes an external subtitle', async ({page}) => {
   const video = page.getByText('Evil.S01E01.mkv')
   await video.click();
   await page.waitForLoadState();
-  const internalSubtitle = video.getByText('Internal').getByText('unknown')
-  await internalSubtitle.click()
-  const external =video.getByText('External')
 
-  expect(external.getByText('default - fr')).toBeDefined()
+  const externalSubtitleCopy = video.getByText('External').getByText(`${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`)
+  expect(externalSubtitleCopy).toBeDefined()
 
-  await external.getByRole('button', {name : 'trash'}).click()
+  await externalSubtitleCopy.getByRole('button', { name: 'trash' }).click()
   await page.waitForLoadState();
 
-  expect(external.getByText('default - fr')).not.toBeDefined()
+  expect(video.getByText('External').getByText(`${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`)).not.toBeDefined()
 })
