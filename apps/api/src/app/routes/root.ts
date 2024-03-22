@@ -19,11 +19,13 @@ import {
   ModifiedDree,
   SubInfo,
   Subtitle,
-  Subtitles,
 } from '@subtitle-translator/shared';
 import download from '../../addic7ed-api/download';
 import * as process from 'node:process';
 import { langs } from '../../addic7ed-api/helpers';
+import { Queue } from 'bullmq'
+const redisOptions = { host: "localhost", port: 6379 };
+
 
 let children: ModifiedDree<dree.Dree>[];
 if (process.env.NODE_ENV === 'production') {
@@ -81,6 +83,10 @@ const directoryCallback = function (directory: ModifiedDree<dree.Dree>) {
   logger.debug(`Add file ${directory.name} to map with uuid ${directory.uuid}`);
   directoryMap.set(directory.uuid, directory);
 };
+
+const jobQueue = new Queue("jobQueue", {
+  connection: redisOptions,
+});
 
 export default async function (fastify: FastifyInstance) {
   fastify.get('/api/files', async () => {
@@ -256,6 +262,7 @@ export default async function (fastify: FastifyInstance) {
       }
 
       try {
+        jobQueue.add
         logger.debug(
           `mkvextract tracks "${file.path}" ${
             Number(number) - 1
