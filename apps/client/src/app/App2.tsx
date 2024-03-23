@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import type { Dree, Type } from 'dree';
+import type { Dree } from 'dree';
+import { Type } from 'dree';
 import FolderNode from './components/FolderNode/FolderNode';
 import FileNode from './components/FileNode/FileNode';
 import type { ModifiedDree } from '@subtitle-translator/shared';

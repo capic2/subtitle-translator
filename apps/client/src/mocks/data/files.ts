@@ -1,6 +1,6 @@
 import type { ModifiedDree } from '@subtitle-translator/shared';
 import * as dree from 'dree'
-import type { Type } from 'dree';
+import { Type } from 'dree';
 
 export const root: ModifiedDree<dree.Dree> =  {
   name: 'root',

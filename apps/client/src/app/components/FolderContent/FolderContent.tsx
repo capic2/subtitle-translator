@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
-import type { Dree, Type } from 'dree';
+import type { Dree } from 'dree';
+import { Type } from 'dree';
 import FolderNode from '../FolderNode/FolderNode';
 import FileNode from '../FileNode/FileNode';
 import React from 'react';
@@ -8,9 +9,7 @@ import type { ModifiedDree } from '@subtitle-translator/shared';
 import { useAppConfigProvider } from '../../providers/AppConfigProvider';
 
 const fetchFolder = async (baseUrl: string, uuid: string) => {
-  return await axios.get(
-    `${baseUrl}/api/directories/${uuid}/files`,
-  );
+  return await axios.get(`${baseUrl}/api/directories/${uuid}/files`);
 };
 
 interface Props {
@@ -18,14 +17,14 @@ interface Props {
 }
 
 const FolderContent = ({ uuid }: Props) => {
-  const {apiUrl} = useAppConfigProvider()
+  const { apiUrl } = useAppConfigProvider();
   const { data, error, isLoading } = useQuery<
     unknown,
     unknown,
     { data: ModifiedDree<Dree> }
   >({
     queryKey: ['fetchFolderContent', uuid],
-    queryFn: () => fetchFolder(apiUrl,uuid),
+    queryFn: () => fetchFolder(apiUrl, uuid),
     refetchOnWindowFocus: false,
   });
 
@@ -48,7 +47,7 @@ const FolderContent = ({ uuid }: Props) => {
           <FolderNode key={child.uuid} node={child} />
         ) : (
           <FileNode key={child.uuid} node={child} />
-        ),
+        )
       )}
     </ul>
   );
