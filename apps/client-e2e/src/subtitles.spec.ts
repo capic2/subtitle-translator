@@ -49,56 +49,74 @@ test('it downloads a subtitle from Addic7ed', async ({ page }) => {
 
   await page.waitForLoadState();
 
-  await  page.getByText('Addic7ed').getByText('French - AMZN.WEB-DL.NTb').click();
+  await page
+    .getByText('Addic7ed')
+    .getByText('French - AMZN.WEB-DL.NTb')
+    .click();
 
   await page.waitForLoadState();
 
   expect(
     page.getByText('Internal').getByText('Evil.S01E02.mkv.fr.srt')
   ).toBeDefined();
+  await page.waitForTimeout(1000);
+  expect(
+    fs.existsSync(`${workspaceRoot}/data/Evil/Evil.S01E02.mkv.fr.srt`)
+  ).toBeTruthy();
 
-  await page.waitForTimeout(1000)
-
-  fs.rmSync(`${workspaceRoot}/data/Evil/Evil.S01E02.mkv.fr.srt`, {force: true})
+  fs.rmSync(`${workspaceRoot}/data/Evil/Evil.S01E02.mkv.fr.srt`, {
+    force: true,
+  });
 });
 
-test('it translates a subtitle from a file', async ({page}) => {
-  test.slow()
+test('it translates a subtitle from a file', async ({ page }) => {
+  test.slow();
 
   await page.goto('/');
 
   await page.getByText('data').click();
   await page.getByText('Evil').click();
-  const video = page.getByText('Evil.S01E01.mkv')
+  const video = page.getByText('Evil.S01E01.mkv');
   await video.click();
   await page.waitForLoadState();
   //const internal = video.getByText('Internal')
-  const internalSubtitle = page.getByText('und')
-  await internalSubtitle.click()
-  const external =video.getByText('External')
+  const internalSubtitle = page.getByText('und');
+  await internalSubtitle.click();
+  const external = video.getByText('External');
 
-  expect(external.getByText('default - fr')).toBeDefined()
+  expect(external.getByText('default - fr')).toBeDefined();
+  expect(fs.existsSync(`${workspaceRoot}/data/Evil/Evil.S01E01.mkv.fr.srt`)).toBeTruthy()
 });
 
-test('it removes an external subtitle', async ({page}) => {
-  fs.copyFileSync(`${workspaceRoot}/data/Evil/Evil.S01E01.mkv.fr.srt`, `${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`)
+test('it removes an external subtitle', async ({ page }) => {
+  fs.copyFileSync(
+    `${workspaceRoot}/data/Evil/Evil.S01E01.mkv.fr.srt`,
+    `${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`
+  );
 
   await page.goto('/');
 
   await page.getByText('data').click();
   await page.getByText('Evil').click();
-  const video = page.getByText('Evil.S01E01.mkv')
+  const video = page.getByText('Evil.S01E01.mkv');
   await video.click();
   await page.waitForLoadState();
 
-  const externalSubtitleCopy = page.getByText('External').getByText(`Evil.S01E01.mkv.fr.srt`)
-  expect(externalSubtitleCopy).toBeDefined()
+  const externalSubtitleCopy = page
+    .getByText('External')
+    .getByText(`Evil.S01E01.mkv.fr.srt`);
+  expect(externalSubtitleCopy).toBeDefined();
 
-  await externalSubtitleCopy.getByRole('button', { name: 'trash' }).click()
+  await externalSubtitleCopy.getByRole('button', { name: 'trash' }).click();
   await page.waitForLoadState();
 
-  await expect(video.getByText('External').getByText(`Evil.S01E01.mkv.fr.srt`)).toHaveCount(0)
+  await expect(
+    video.getByText('External').getByText(`Evil.S01E01.mkv.fr.srt`)
+  ).toHaveCount(0);
 
-  fs.copyFileSync(`${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`, `${workspaceRoot}/data/Evil/Evil.S01E01.mkv.fr.srt`)
-  fs.rmSync(`${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`)
-})
+  fs.copyFileSync(
+    `${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`,
+    `${workspaceRoot}/data/Evil/Evil.S01E01.mkv.fr.srt`
+  );
+  fs.rmSync(`${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`);
+});
