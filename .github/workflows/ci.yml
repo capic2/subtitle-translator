@@ -40,7 +40,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Install tools
-        run: apt install mkvtoolnix python3-pip -y && pip3 install subtrans
+        run: sudo apt install mkvtoolnix python3-pip -y && pip3 install subtrans
 
 
       - run: npx nx affected -t lint test build e2e --parallel=3
