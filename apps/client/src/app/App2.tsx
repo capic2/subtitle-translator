@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { Dree, Type } from 'dree';
+import type { Dree, Type } from 'dree';
 import FolderNode from './components/FolderNode/FolderNode';
 import FileNode from './components/FileNode/FileNode';
-import { ModifiedDree } from '@subtitle-translator/shared';
+import type { ModifiedDree } from '@subtitle-translator/shared';
 import { useAppConfigProvider } from './providers/AppConfigProvider';
 
 const fetch = (baseUrl: string) => {

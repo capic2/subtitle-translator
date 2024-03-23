@@ -1,4 +1,4 @@
-import { Dree } from 'dree';
+import type { Dree } from 'dree';
 import { useState } from 'react';
 import FolderContent from '../FolderContent/FolderContent';
 import { FcFolder } from 'react-icons/fc';

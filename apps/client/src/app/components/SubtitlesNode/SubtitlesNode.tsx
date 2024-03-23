@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Dree } from 'dree';
+import type { Dree } from 'dree';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ModifiedDree,

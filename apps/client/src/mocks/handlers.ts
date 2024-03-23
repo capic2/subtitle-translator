@@ -6,7 +6,7 @@ import {
   Subtitles,
 } from '@subtitle-translator/shared';
 import * as dree from 'dree';
-import { Type } from 'dree';
+import type { Type } from 'dree';
 import { root } from './data/files';
 import { internalSubtitles } from './data/internalSubtitles';
 import { externalSubtitles } from './data/externalSubtitles';

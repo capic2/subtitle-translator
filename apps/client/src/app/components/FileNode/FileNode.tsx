@@ -1,4 +1,4 @@
-import { Dree } from 'dree';
+import type { Dree } from 'dree';
 import React, { useState } from 'react';
 import { FcFile } from 'react-icons/fc';
 import SubtitlesNode from '../SubtitlesNode/SubtitlesNode';

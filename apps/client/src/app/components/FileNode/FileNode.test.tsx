@@ -1,7 +1,7 @@
 import { describe, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import FileNode from './FileNode';
-import { Type } from 'dree';
+import type { Type } from 'dree';
 import userEvent from '@testing-library/user-event';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 
