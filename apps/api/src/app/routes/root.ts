@@ -18,8 +18,7 @@ import {
   isExternalSubtitle,
   ModifiedDree,
   SubInfo,
-  Subtitle,
-  Subtitles,
+  Subtitle
 } from '@subtitle-translator/shared';
 import download from '../../addic7ed-api/download';
 import * as process from 'node:process';
@@ -262,7 +261,7 @@ export default async function (fastify: FastifyInstance) {
           }:"/data/temp/${path.basename(file.path)}.srt"`
         );
 
-        const stdoutMkvextract = execSync(
+        execSync(
           `mkvextract tracks "${file.path}" ${
             Number(number) - 1
           }:"/data/temp/${path.basename(file.path)}.srt"`
@@ -279,7 +278,7 @@ export default async function (fastify: FastifyInstance) {
           )}.srt" --src en --dest fr`
         );
 
-        const stdoutSubtrans = execSync(
+        execSync(
           `subtrans translate "/data/temp/${path.basename(
             file.path
           )}.srt" --src en --dest fr`

@@ -18,18 +18,26 @@ export default async function search({
 }) {
   axiosRetry(axios, { retries: 5 });
 
-  const searchTitle =
-    `${show.trim()} ${season ? formatShowNumber(season) : ''} ${episode ? formatShowNumber(episode) : ''}`.trim();
+  const searchTitle = `${show.trim()} ${
+    season ? formatShowNumber(season) : ''
+  } ${episode ? formatShowNumber(episode) : ''}`.trim();
   const addic7edSearchURL = `${addic7edURL}/srch.php?search=${searchTitle}&Submit=Search`;
 
   logger.debug(`Search url: ${addic7edSearchURL}`);
 
-  const response = await axios.get(addic7edSearchURL, {
+  const response = await axios.get<Promise<string>>(addic7edSearchURL, {
     headers,
     validateStatus: function (status) {
+      logger.debug(status)
       return status < 500; // Resolve only if the status code is less than 500
     },
   });
+
+  if (response.status !== 200) {
+    logger.error(`Error during Addic7ed search step: ${response.statusText}`);
+    throw new Error(response.statusText);
+  }
+
   const body = await response.data;
 
   /* if (!/<b>\d+ results found<\/b>/.test(body)) {
@@ -57,7 +65,7 @@ export default async function search({
         '/' +
         parseInt(episode) +
         '/.+?)"'
-      : 'href="(movie/[0-9]+?)"',
+      : 'href="(movie/[0-9]+?)"'
   );
 
   const urlMatch = body.match(regexp);
@@ -101,7 +109,7 @@ function getVersionInfo(availableSubtitle: HTMLElement) {
     .at(0);
 
   const distributionMatch = version.match(
-    /HDTV|WEB(.DL|.?RIP)?|WR|BRRIP|BDRIP|BLURAY/i,
+    /HDTV|WEB(.DL|.?RIP)?|WR|BRRIP|BDRIP|BLURAY/i
   );
 
   const distribution = distributionMatch
@@ -115,7 +123,7 @@ function getVersionInfo(availableSubtitle: HTMLElement) {
     version
       .replace(
         /.?(REPACK|PROPER|[XH].?264|HDTV|480P|720P|1080P|2160P|AMZN|WEB(.DL|.?RIP)?|WR|BRRIP|BDRIP|BLURAY)+.?/g,
-        '',
+        ''
       )
       .trim()
       .toUpperCase() || 'UNKNOWN';
@@ -140,7 +148,7 @@ function findSubtitles2({
     .replace(addic7edURL, '');
 
   const availableSubtitles = dom.querySelectorAll(
-    'table.tabel95:has(td.NewsTitle)',
+    'table.tabel95:has(td.NewsTitle)'
   );
 
   logger.debug(`${availableSubtitles.length} found`);
@@ -148,7 +156,7 @@ function findSubtitles2({
   const downloadableSubtitles = availableSubtitles.map((availableSubtitle) => {
     const downloads = availableSubtitle
       .querySelector(
-        'td.newsDate:not(:has(img[src="https://www.addic7ed.com/images/invisible.gif"]))',
+        'td.newsDate:not(:has(img[src="https://www.addic7ed.com/images/invisible.gif"]))'
       )
       .text.split(' . ')
       .at(1);
@@ -173,7 +181,7 @@ function findSubtitles2({
     showTitle,
     referer,
     downloadableSubtitles: downloadableSubtitles.filter(({ lang }) =>
-      languages.includes(lang.toLowerCase()),
+      languages.includes(lang.toLowerCase())
     ),
   };
 }

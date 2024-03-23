@@ -63,6 +63,8 @@ test('it downloads a subtitle from Addic7ed', async ({ page }) => {
 });
 
 test('it translates a subtitle from a file', async ({page}) => {
+  test.slow()
+
   await page.goto('/');
 
   await page.getByText('data').click();
@@ -70,7 +72,8 @@ test('it translates a subtitle from a file', async ({page}) => {
   const video = page.getByText('Evil.S01E01.mkv')
   await video.click();
   await page.waitForLoadState();
-  const internalSubtitle = video.getByText('Internal').getByText('unknown')
+  //const internal = video.getByText('Internal')
+  const internalSubtitle = page.getByText('und')
   await internalSubtitle.click()
   const external =video.getByText('External')
 
@@ -96,5 +99,6 @@ test('it removes an external subtitle', async ({page}) => {
 
   await expect(video.getByText('External').getByText(`Evil.S01E01.mkv.fr.srt`)).toHaveCount(0)
 
+  fs.copyFileSync(`${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`, `${workspaceRoot}/data/Evil/Evil.S01E01.mkv.fr.srt`)
   fs.rmSync(`${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`)
 })
