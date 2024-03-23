@@ -88,11 +88,13 @@ test('it removes an external subtitle', async ({page}) => {
   await video.click();
   await page.waitForLoadState();
 
-  const externalSubtitleCopy = video.getByText('External').getByText(`${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`)
+  const externalSubtitleCopy = page.getByText('External').getByText(`Evil.S01E01.mkv.fr.srt`)
   expect(externalSubtitleCopy).toBeDefined()
 
   await externalSubtitleCopy.getByRole('button', { name: 'trash' }).click()
   await page.waitForLoadState();
 
-  expect(video.getByText('External').getByText(`${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`)).not.toBeDefined()
+  await expect(video.getByText('External').getByText(`Evil.S01E01.mkv.fr.srt`)).toHaveCount(0)
+
+  fs.rmSync(`${workspaceRoot}/data/Evil/Evil.S01E01.copy.mkv.fr.srt`)
 })

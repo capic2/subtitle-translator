@@ -1,4 +1,5 @@
-import { Addic7edSubtitle, ExternalSubtitle, InternalSubtitle, Subtitle } from '@subtitle-translator/shared';
+import { Addic7edSubtitle, ExternalSubtitle, InternalSubtitle, Subtitle } from './type';
+
 
 export const isExternalSubtitle = (
   subtitle: Subtitle
