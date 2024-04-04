@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import logger from '../../utils/logger';
 import path from 'path';
 import fs from 'fs';
-import { execSync } from 'child_process';
+import {  exec } from 'child_process';
 import {
   getSubtitlesFromAddic7ed,
   getSubtitlesFromDirectory,
@@ -18,14 +18,18 @@ import {
   isExternalSubtitle,
   ModifiedDree,
   SubInfo,
-  Subtitle
+  Subtitle,
 } from '@subtitle-translator/shared';
 import download from '../../addic7ed-api/download';
 import * as process from 'node:process';
 import { langs } from '../../addic7ed-api/helpers';
+import { EventEmitter } from 'node:events';
 
 let children: ModifiedDree<dree.Dree>[];
+let dataDirectory: string;
+
 if (process.env.NODE_ENV === 'production') {
+  dataDirectory = '/data';
   children = [
     {
       name: 'Séries en cours',
@@ -54,6 +58,7 @@ if (process.env.NODE_ENV === 'production') {
     },
   ];
 } else {
+  dataDirectory = './data';
   children = [
     {
       name: 'Environement de développement',
@@ -82,6 +87,17 @@ const directoryCallback = function (directory: ModifiedDree<dree.Dree>) {
 };
 
 export default async function (fastify: FastifyInstance) {
+  const eventEmmitter = new EventEmitter();
+
+  fastify.get('/api/jobState', (_, reply) => {
+    eventEmmitter.on('data', ({jobName, data}: {jobName: string, data: string}) => {
+      reply.sse({id: jobName, data: data.match(/(\b\d+?.?\d+?%)/)?.at(0)});
+    })
+    eventEmmitter.on('end', () => {
+      reply.sseContext.source.end()
+    })
+  })
+
   fastify.get('/api/files', async () => {
     const tree: dree.Dree = {
       name: 'root',
@@ -225,7 +241,7 @@ export default async function (fastify: FastifyInstance) {
 
   fastify.post<{ Body: { uuid: string; number: number } }>(
     '/api/subtitles/translate',
-    (request, reply) => {
+    async (request, reply) => {
       const { uuid, number } = request.body;
 
       if (!uuid) {
@@ -258,44 +274,57 @@ export default async function (fastify: FastifyInstance) {
         logger.debug(
           `mkvextract tracks "${file.path}" ${
             Number(number) - 1
-          }:"/data/temp/${path.basename(file.path)}.srt"`
+          }:"${dataDirectory}/temp/${path.basename(file.path)}.srt"`
         );
 
-        execSync(
-          `mkvextract tracks "${file.path}" ${
-            Number(number) - 1
-          }:"/data/temp/${path.basename(file.path)}.srt"`
-        );
+        await new Promise((resolve) => {
+          const mkvextract = exec(
+            `mkvextract tracks "${file.path}" ${
+              Number(number) - 1
+            }:"${dataDirectory}/temp/${path.basename(file.path)}.srt"`
+          );
 
-        // the *entire* stdout and stderr (buffered)
+          mkvextract.stdout.on('data', (data: string) => {
+            eventEmmitter.emit('data', {jobName: 'mkvextract', data})
+          })
 
-        //console.log(`stderr: ${stderr}`);
-        /* fs.copyFileSync(`/data/temp/${path.basename(filePath)}.srt`,
-        `/data/input/${path.basename(filePath)}.srt`) */
+          mkvextract.on('close', () => resolve(''));
+        });
+
+        await new Promise((resolve) => {
+          logger.debug(
+            `subtrans translate "${dataDirectory}/temp/${path.basename(
+              file.path
+            )}.srt" --src en --dest fr`
+          );
+
+          const subtrans = exec(
+            `subtrans translate "${dataDirectory}/temp/${path.basename(
+              file.path
+            )}.srt" --src en --dest fr`
+          );
+
+          subtrans.stdout.on('data', (data: string) => {
+            eventEmmitter.emit('data', {jobName: 'subtrans', data})
+          })
+
+          subtrans.on('close', () => resolve(''));
+        });
+
         logger.debug(
-          `subtrans translate "/data/temp/${path.basename(
-            file.path
-          )}.srt" --src en --dest fr`
+          `remove ${dataDirectory}/temp/${path.basename(file.path)}.srt`
         );
-
-        execSync(
-          `subtrans translate "/data/temp/${path.basename(
-            file.path
-          )}.srt" --src en --dest fr`
-        );
-
-        logger.debug(`remove /data/temp/${path.basename(file.path)}.srt`);
-        fs.rmSync(`/data/temp/${path.basename(file.path)}.srt`);
+        fs.rmSync(`${dataDirectory}/temp/${path.basename(file.path)}.srt`);
         logger.debug(
           `move file to ${path.dirname(file.path)}/${path.basename(
             file.path
           )}.fr.srt`
         );
         fs.copyFileSync(
-          `/data/temp/${path.basename(file.path)}.fr.srt`,
+          `${dataDirectory}/temp/${path.basename(file.path)}.fr.srt`,
           `${path.dirname(file.path)}/${path.basename(file.path)}.fr.srt`
         );
-        fs.rmSync(`/data/temp/${path.basename(file.path)}.fr.srt`);
+        fs.rmSync(`${dataDirectory}/temp/${path.basename(file.path)}.fr.srt`);
 
         const dree: ModifiedDree<dree.Dree> = {
           uuid: uuidv4(),
@@ -308,6 +337,8 @@ export default async function (fastify: FastifyInstance) {
 
         fileMap.set(dree.uuid, dree);
 
+        eventEmmitter.emit('end')
+        
         reply.status(201).send({
           uuid: dree.uuid,
           language: 'fr',
@@ -366,7 +397,7 @@ export default async function (fastify: FastifyInstance) {
       logger.debug(
         `Download file ${file.path}.srt with link ${link} and referer ${referer}`
       );
-      const subtitlePath = `${file.path}.${langs[language.toLowerCase()]}.srt`
+      const subtitlePath = `${file.path}.${langs[language.toLowerCase()]}.srt`;
       await download({ link, referer }, subtitlePath);
 
       const dree: ModifiedDree<dree.Dree> = {
