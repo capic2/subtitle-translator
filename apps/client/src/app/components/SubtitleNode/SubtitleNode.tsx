@@ -1,12 +1,14 @@
 import SubtitleText from '../SubtitleText/SubtitleText';
 import {
-   isAddic7edSubtitle, isInternalSubtitle,
+  isAddic7edSubtitle,
+  isInternalSubtitle,
   SubInfo,
-  Subtitle
+  Subtitle,
 } from '@subtitle-translator/shared';
 import { useMutation } from '@tanstack/react-query';
 import axios, { AxiosResponse } from 'axios';
 import { useAppConfigProvider } from '../../providers/AppConfigProvider';
+import { useState } from 'react';
 
 interface Props {
   fileUuid: string;
@@ -16,6 +18,7 @@ interface Props {
 
 const SubtitleNode = ({ fileUuid, subtitle, addSubtitle }: Props) => {
   const { apiUrl } = useAppConfigProvider();
+  const [translateState, setTranslateState] = useState<string>('');
   const mutationTranslate = useMutation<
     AxiosResponse<Subtitle>,
     void,
@@ -27,7 +30,15 @@ const SubtitleNode = ({ fileUuid, subtitle, addSubtitle }: Props) => {
         number,
       });
     },
+    onMutate: () => {
+      const eventSource = new EventSource(`${apiUrl}/api/jobState`)
+      eventSource.onmessage =(event) => {
+        const {lastEventId, data} = event;
+        setTranslateState(`${lastEventId}: ${data}`)
+      };
+    },
     onSuccess: (data) => {
+      setTranslateState('')
       addSubtitle(data.data);
     },
   });
@@ -93,7 +104,7 @@ const SubtitleNode = ({ fileUuid, subtitle, addSubtitle }: Props) => {
         fileUuid={fileUuid}
         subtitle={subtitle}
         isLoading={mutationTranslate.isPending || mutationDownload.isPending}
-      />
+      /><span>{translateState}</span>
     </li>
   );
 };

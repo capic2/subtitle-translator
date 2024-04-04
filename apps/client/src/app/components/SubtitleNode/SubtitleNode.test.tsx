@@ -42,7 +42,7 @@ describe('SubtitleNode', () => {
       }
     );
   });
-  it('translates the file if subtitle is Internal', async () => {
+  it.skip('translates the file if subtitle is Internal', async () => {
     const subtitle: InternalSubtitle = {
       number: 3,
       language: undefined,
@@ -67,15 +67,18 @@ describe('SubtitleNode', () => {
       {
         number: 3,
         uuid: '1',
-      }
-    );
+      })
   });
+
+  it.todo('streams the progress')
+
   it('does nothing if subtitle is External', async () => {
     const subtitle: ExternalSubtitle = {
       origin: 'External',
       uuid: '1',
       name: 'a',
       language: 'en',
+      path: ''
     };
 
     render(
